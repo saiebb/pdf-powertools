@@ -75,7 +75,9 @@ export const usePerformanceOptimization = (options: PerformanceOptions = {}) => 
       // تنفيذ العملية التالية في قائمة الانتظار
       const nextOperation = pendingOperationsRef.current.shift();
       if (nextOperation) {
-        executeWithConcurrencyLimit(nextOperation);
+        executeWithConcurrencyLimit(async () => {
+          await nextOperation();
+        });
       }
     }
   }, [maxConcurrentOperations]);

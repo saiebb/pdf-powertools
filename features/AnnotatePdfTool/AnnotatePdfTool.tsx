@@ -5,7 +5,7 @@ import { Button, Spinner } from '../../components/uiElements';
 import { Type, Image as ImageIconLucide, Download, PlusCircle, FileText as FileTextIcon } from 'lucide-react';
 import { useAnnotatePdfTool } from './useAnnotatePdfTool';
 import { useAppContext } from '../../contexts/AppContext';
-import { PerformanceMonitor } from './components/PerformanceMonitor.ts';
+import { PerformanceMonitor } from './components/PerformanceMonitor';
 
 interface AnnotatePdfToolProps {
   uploadedFile: UploadedFile | undefined; 

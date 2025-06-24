@@ -77,8 +77,11 @@ export const getOptimizedConfig = (fileSize: number) => {
     };
   }
   
-  // ملفات عادية
-  return PERFORMANCE_CONFIG;
+  // ملفات عادية - إنشاء نسخة قابلة للتعديل
+  return {
+    ...PERFORMANCE_CONFIG,
+    THUMBNAILS: { ...PERFORMANCE_CONFIG.THUMBNAILS }
+  };
 };
 
 // دالة للتحقق من قدرات المتصفح
@@ -95,22 +98,45 @@ export const getBrowserCapabilities = () => {
   };
 };
 
+// نوع البيانات للإعدادات القابلة للتعديل
+type MutableConfig = {
+  THUMBNAILS: {
+    MAX_PAGES: number;
+    SCALE: number;
+    QUALITY: number;
+    CHUNK_SIZE: number;
+    CHUNK_DELAY: number;
+    RENDER_TIMEOUT: number;
+  };
+  PREVIEW: typeof PERFORMANCE_CONFIG.PREVIEW;
+  OPTIMIZATION: typeof PERFORMANCE_CONFIG.OPTIMIZATION;
+  ERROR_HANDLING: typeof PERFORMANCE_CONFIG.ERROR_HANDLING;
+  IGNORED_ERROR_PATTERNS: typeof PERFORMANCE_CONFIG.IGNORED_ERROR_PATTERNS;
+  MONITORING: typeof PERFORMANCE_CONFIG.MONITORING;
+};
+
 // دالة لتحسين الإعدادات حسب قدرات المتصفح
-export const getAdaptiveConfig = (fileSize: number) => {
+export const getAdaptiveConfig = (fileSize: number): MutableConfig => {
   const baseConfig = getOptimizedConfig(fileSize);
   const capabilities = getBrowserCapabilities();
+  
+  // إنشاء نسخة قابلة للتعديل من الإعدادات
+  const adaptiveConfig: MutableConfig = {
+    ...baseConfig,
+    THUMBNAILS: { ...baseConfig.THUMBNAILS }
+  };
   
   // تحسينات إضافية حسب قدرات المتصفح
   if (!capabilities.webGL) {
     // تقليل الجودة إذا لم يكن WebGL متاحاً
-    baseConfig.THUMBNAILS.QUALITY = 0.4;
-    baseConfig.THUMBNAILS.SCALE = 0.1;
+    adaptiveConfig.THUMBNAILS.QUALITY = 0.4;
+    adaptiveConfig.THUMBNAILS.SCALE = 0.1;
   }
   
   if (!capabilities.requestIdleCallback) {
     // زيادة التأخير إذا لم يكن requestIdleCallback متاحاً
-    baseConfig.THUMBNAILS.CHUNK_DELAY *= 2;
+    adaptiveConfig.THUMBNAILS.CHUNK_DELAY *= 2;
   }
   
-  return baseConfig;
+  return adaptiveConfig;
 };

@@ -133,7 +133,7 @@ export const useAnnotatePdfTool = ({
       
       await chunkWork(
         pageIndices,
-        async (pageIndex) => {
+        async (pageIndex: number) => {
           try {
             if (pageIndex % 3 === 0) { // Update progress every 3 pages
               console.log(`Processing thumbnail ${pageIndex + 1}/${numPages}...`);
