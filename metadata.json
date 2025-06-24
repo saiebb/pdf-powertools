@@ -1,0 +1,5 @@
+{
+  "name": "PDF PowerTools",
+  "description": "A web application with various tools to manipulate PDF files, such as merging, organizing, protecting, and converting PDFs to images.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF.js Test</title>
+</head>
+<body>
+    <h1>PDF.js Test</h1>
+    <div id="status">Loading...</div>
+    
+    <!-- Load PDF.js from JSDelivr -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    
+    <script>
+        function checkPdfJs() {
+            const statusDiv = document.getElementById('status');
+            
+            if (typeof window.pdfjsLib === 'undefined') {
+                statusDiv.innerHTML = '<span style="color: red;">❌ PDF.js not loaded</span>';
+                return;
+            }
+            
+            statusDiv.innerHTML = `
+                <div style="color: green;">✅ PDF.js loaded successfully!</div>
+                <div>Version: ${window.pdfjsLib.version || 'Unknown'}</div>
+                <div>GlobalWorkerOptions: ${typeof window.pdfjsLib.GlobalWorkerOptions}</div>
+                <div>getDocument: ${typeof window.pdfjsLib.getDocument}</div>
+            `;
+            
+            // Set worker
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+            console.log('PDF.js worker configured');
+        }
+        
+        // Check immediately
+        checkPdfJs();
+        
+        // Check again after a delay
+        setTimeout(checkPdfJs, 1000);
+        setTimeout(checkPdfJs, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF.js Debug Test</title>
+</head>
+<body>
+    <h1>PDF.js Loading Test</h1>
+    <div id="status">Loading...</div>
+    <div id="details"></div>
+
+    <!-- Load PDF.js -->
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const detailsDiv = document.getElementById('details');
+        
+        function updateStatus(message, isError = false) {
+            statusDiv.innerHTML = message;
+            statusDiv.style.color = isError ? 'red' : 'green';
+            console.log(message);
+        }
+        
+        function addDetail(message) {
+            detailsDiv.innerHTML += '<p>' + message + '</p>';
+            console.log(message);
+        }
+        
+        // Test PDF.js loading
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        function checkPdfJs() {
+            attempts++;
+            addDetail(`Attempt ${attempts}: Checking PDF.js...`);
+            
+            if (typeof window.pdfjsLib !== 'undefined') {
+                addDetail('✓ window.pdfjsLib is available');
+                addDetail('Version: ' + (window.pdfjsLib.version || 'unknown'));
+                addDetail('GlobalWorkerOptions: ' + typeof window.pdfjsLib.GlobalWorkerOptions);
+                addDetail('getDocument: ' + typeof window.pdfjsLib.getDocument);
+                
+                if (window.pdfjsLib.GlobalWorkerOptions && 
+                    window.pdfjsLib.version && 
+                    window.pdfjsLib.getDocument) {
+                    updateStatus('✓ PDF.js loaded successfully!');
+                    
+                    // Set worker
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 
+                        'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+                    addDetail('✓ Worker path set');
+                    return;
+                }
+            } else {
+                addDetail('✗ window.pdfjsLib is undefined');
+            }
+            
+            if (attempts >= maxAttempts) {
+                updateStatus('✗ Failed to load PDF.js after ' + maxAttempts + ' attempts', true);
+                return;
+            }
+            
+            setTimeout(checkPdfJs, 500);
+        }
+        
+        // Start checking after a short delay
+        setTimeout(checkPdfJs, 100);
+    </script>
+</body>
+</html>
