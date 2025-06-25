@@ -90,6 +90,15 @@ const App: React.FC = () => {
     setGlobalLoading(true);
     setAreCoreServicesReady(false);
 
+    // Add a safety timeout to prevent infinite loading
+    const safetyTimeout = setTimeout(() => {
+      console.warn('Safety timeout triggered - forcing initialization to complete');
+      setGlobalLoading(false);
+      setAreCoreServicesReady(true);
+      initializationInProgress.current = false;
+      displayMessage('warning', 'تم تحميل التطبيق مع إعدادات محدودة. قد تحتاج لإعادة تحميل الصفحة للحصول على جميع الميزات.', 10000);
+    }, 15000); // 15 seconds timeout
+
     const initializeServices = async () => {
       try {
         const pdfJsPromise = setupPdfJsWorker();
@@ -141,8 +150,11 @@ const App: React.FC = () => {
         // Still set as ready to prevent infinite reload loop
         setAreCoreServicesReady(true);
       } finally {
+        // Clear the safety timeout since we're completing normally
+        clearTimeout(safetyTimeout);
         setGlobalLoading(false);
         initializationInProgress.current = false; // Reset the flag
+        console.log('Initialization completed - loading state set to false');
       }
     };
 
@@ -284,6 +296,7 @@ const App: React.FC = () => {
   };
   
   if (isLoading) { 
+    console.log('App render: isLoading is true, showing loading screen');
     return (
       <div className="min-h-screen bg-[var(--color-background)] flex flex-col items-center justify-center py-6 sm:py-12 px-2 md:px-4 text-[var(--color-text-base)]" dir="rtl">
         <Spinner text="جاري تهيئة التطبيق..." size="lg" />

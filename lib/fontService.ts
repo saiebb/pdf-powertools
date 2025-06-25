@@ -10,12 +10,28 @@ export function setDisplayAppMessageFn(fn: DisplayMessageFn) {
 
 export async function fetchArabicFont(): Promise<ArrayBuffer | null> {
   if (arabicFontBufferSingleton) {
+    console.log("Arabic font already loaded, returning cached version");
     return arabicFontBufferSingleton;
   }
+  
   try {
+    console.log("Starting Arabic font fetch...");
     // No longer ensureFontkitIsLoaded, as fontkit is removed.
     const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/fontsource-noto-sans-arabic/5.0.12/files/noto-sans-arabic-arabic-400-normal.woff2';
-    const response = await fetch(fontUrl);
+    
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(fontUrl, { 
+      signal: controller.signal,
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
     if (!response.ok) throw new Error(`Failed to fetch font: ${response.statusText}`);
     const buffer = await response.arrayBuffer();
     arabicFontBufferSingleton = buffer;
@@ -23,7 +39,15 @@ export async function fetchArabicFont(): Promise<ArrayBuffer | null> {
     return buffer;
   } catch (err) {
     console.error("Error loading Arabic font:", err);
-    displayAppMessage('warning', "لم يتم تحميل الخط العربي، قد لا تظهر النصوص العربية بشكل صحيح في التعليقات.", 10000);
+    
+    // Check if it's a timeout/abort error
+    if (err instanceof Error && err.name === 'AbortError') {
+      console.warn("Arabic font fetch timed out");
+      displayAppMessage('warning', "انتهت مهلة تحميل الخط العربي. قد لا تظهر النصوص العربية بشكل صحيح.", 8000);
+    } else {
+      displayAppMessage('warning', "لم يتم تحميل الخط العربي، قد لا تظهر النصوص العربية بشكل صحيح في التعليقات.", 10000);
+    }
+    
     return null;
   }
 }

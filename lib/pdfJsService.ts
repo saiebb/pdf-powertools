@@ -111,7 +111,7 @@ export function setupPdfJsWorker(): Promise<void> {
       // Now check again with polling
       return new Promise<void>((resolve, reject) => {
         let attempts = 0;
-        const maxAttempts = 15; // 15 * 500ms = 7.5 seconds total
+        const maxAttempts = 10; // Reduced from 15 to 10 (5 seconds total)
 
         const checkAndSetup = () => {
           attempts++;
@@ -132,18 +132,26 @@ export function setupPdfJsWorker(): Promise<void> {
           const status = checkPdfJsStatus();
           if (status.isAvailable && !status.workerConfigured) {
             console.log('setupPdfJsWorker: PDF.js loaded, configuring worker...');
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
-            console.log(`PDF.js worker path set to: ${PDF_WORKER_URL}`);
-            pdfJsSetupCompleted = true;
-            resolve();
-            return;
+            try {
+              window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
+              console.log(`PDF.js worker path set to: ${PDF_WORKER_URL}`);
+              pdfJsSetupCompleted = true;
+              resolve();
+              return;
+            } catch (workerError) {
+              console.error('Error setting PDF.js worker:', workerError);
+              // Continue to next attempt instead of failing immediately
+            }
           }
 
           if (attempts >= maxAttempts) {
             const errorMsg = "PDF.js library not available from CDN after multiple attempts. This might be due to network issues or CDN problems.";
             console.error(errorMsg);
             displayAppMessage('error', 'فشل تحميل مكتبة PDF.js. يرجى التحقق من اتصال الإنترنت وإعادة تحميل الصفحة.', 10000);
-            reject(new Error(errorMsg));
+            // Instead of rejecting, resolve with a warning to prevent hanging
+            console.warn('Resolving PDF.js setup with failure to prevent app hanging');
+            pdfJsSetupCompleted = false; // Mark as failed but don't block the app
+            resolve(); // Resolve instead of reject
             return;
           }
 
