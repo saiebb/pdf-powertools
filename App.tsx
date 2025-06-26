@@ -297,6 +297,9 @@ const App: React.FC = () => {
   
   if (isLoading) { 
     console.log('App render: isLoading is true, showing loading screen');
+    console.log('App render: areCoreServicesReady:', areCoreServicesReady);
+    console.log('App render: currentToolId:', currentToolId);
+    console.log('App render: loadedFiles.length:', loadedFiles.length);
     return (
       <div className="min-h-screen bg-[var(--color-background)] flex flex-col items-center justify-center py-6 sm:py-12 px-2 md:px-4 text-[var(--color-text-base)]" dir="rtl">
         <Spinner text="جاري تهيئة التطبيق..." size="lg" />

@@ -34,6 +34,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
+  // Add debugging for isLoading changes
+  const setGlobalLoadingWithDebug = useCallback((loading: boolean) => {
+    console.log(`setGlobalLoading called with: ${loading}, current: ${isLoading}`);
+    console.trace('setGlobalLoading call stack');
+    setIsLoading(loading);
+  }, [isLoading]);
+
   const displayMessage: AppDisplayMessageFn = useCallback((type, message, duration = 7000) => {
     if (type === 'success') setSuccessMessage(message);
     else if (type === 'error') setErrorMessage(message);
@@ -70,7 +77,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider value={{
       isLoading,
-      setGlobalLoading: setIsLoading,
+      setGlobalLoading: setGlobalLoadingWithDebug,
       areCoreServicesReady, 
       setAreCoreServicesReady,
       displayMessage,

@@ -1,16 +1,34 @@
 # إصلاح مشكلة التعليق على رسالة "جاري تهيئة التطبيق..."
 
 ## المشكلة
-كان التطبيق يعلق على رسالة "جاري تهيئة التطبيق..." على الاستضافة، بينما يعمل بشكل طبيعي محلياً.
+كان التطبيق يعلق على رسالة "جاري تهيئة التطبيق..." على الاستضافة، خاصة في الأدوات التي تعرض صفحات PDF مثل أداة التنظيم والتعليق.
 
-## الأسباب المحتملة
+## السبب الجذري المكتشف
+**Infinite Loop في useEffect**: كانت المشكلة الرئيسية في وجود حلقة لا نهائية في useEffect بسبب إدراج functions في dependency array، مما يسبب إعادة تشغيل مستمرة لعملية معالجة PDF.
+
+## الأسباب المحتملة الأخرى
 1. **مشاكل الشبكة**: بطء في تحميل مكتبات PDF.js أو الخط العربي من CDN
 2. **مشاكل التزامن**: عدم إكمال عملية التهيئة بشكل صحيح
 3. **عدم معالجة الأخطاء**: عدم وجود آلية للتعامل مع حالات الفشل
 
 ## الحلول المطبقة
 
-### 1. إضافة Safety Timeout (App.tsx)
+### 1. إصلاح Infinite Loop في useEffect (الحل الرئيسي)
+**المشكلة**: كانت functions مثل `preparePdfForView` و `prepareAnnotateToolThumbnails` مدرجة في dependency array لـ useEffect، مما يسبب إعادة تشغيل مستمرة.
+
+**الإصلاح**:
+- `useOrganizeExtractTool.ts`: إزالة `preparePdfForView` من dependencies
+- `useAnnotatePdfTool.ts`: إزالة `prepareAnnotateToolThumbnails` من dependencies
+
+```typescript
+// قبل الإصلاح
+}, [uploadedFile, preparePdfForView, areCoreServicesReady]);
+
+// بعد الإصلاح  
+}, [uploadedFile?.id, uploadedFile?.pdfDoc, areCoreServicesReady]);
+```
+
+### 2. إضافة Safety Timeout (App.tsx)
 ```typescript
 // إضافة timeout أمان لمنع التعليق اللانهائي
 const safetyTimeout = setTimeout(() => {
@@ -51,8 +69,10 @@ const safetyTimeout = setTimeout(() => {
 4. تحقق من Network tab لمعرفة الطلبات المعلقة
 
 ## الملفات المعدلة
+- `features/OrganizeExtractTool/useOrganizeExtractTool.ts`: إصلاح infinite loop في useEffect
+- `features/AnnotatePdfTool/useAnnotatePdfTool.ts`: إصلاح infinite loop في useEffect  
 - `App.tsx`: إضافة safety timeout وتحسين معالجة الأخطاء
-- `lib/pdfJsService.ts`: تحسين آلية polling وmعالجة الأخطاء
+- `lib/pdfJsService.ts`: تحسين آلية polling ومعالجة الأخطاء
 - `lib/fontService.ts`: إضافة timeout وAbortController
 
 ## ملاحظات مهمة
