@@ -186,8 +186,8 @@ export const useOrganizeExtractTool = ({
     } else if (!uploadedFile?.pdfDoc) { // Clear if no file
       setOrganizablePdf(null); 
     }
-    // If services are not ready yet, preparePdfForView will be called again when areCoreServicesReady becomes true, due to it being in preparePdfForView's deps
-  }, [uploadedFile, preparePdfForView, areCoreServicesReady]);
+    // If services are not ready yet, preparePdfForView will be called again when areCoreServicesReady becomes true
+  }, [uploadedFile?.id, uploadedFile?.pdfDoc, areCoreServicesReady]); // Remove preparePdfForView from dependencies to prevent infinite loop
 
 
   const handleRotatePage = (pageId: string, direction: 'cw' | 'ccw') => {

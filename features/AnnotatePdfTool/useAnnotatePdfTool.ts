@@ -245,7 +245,7 @@ export const useAnnotatePdfTool = ({
         prepareAnnotateToolThumbnails();
       }, 800);
     }
-  }, [shouldGenerateThumbnails, prepareAnnotateToolThumbnails, debounce]);
+  }, [shouldGenerateThumbnails, debounce]); // Remove prepareAnnotateToolThumbnails from dependencies to prevent infinite loop
 
 
   // إضافة مرجع لمنع إعادة التصيير المتكررة للمعاينة
