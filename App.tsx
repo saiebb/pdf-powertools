@@ -7,7 +7,8 @@ import { Button, Spinner, Alert } from './components/uiElements';
 import { Tool, ToolId, UploadedFile } from './types'; 
 import {
   Users, Settings2, Lock, Image as ImageIconLucide, ArrowLeft,
-  Scissors, FileOutput, FileImage, FileEdit, KeyRound, ClipboardType, Minimize2, FileText
+  Scissors, FileOutput, FileImage, FileEdit, KeyRound, ClipboardType, Minimize2, FileText,
+  FileSpreadsheet, Presentation, Code
 } from 'lucide-react'; 
 
 import { 
@@ -32,6 +33,12 @@ import { UnlockPdfTool } from './features/UnlockPdfTool/UnlockPdfTool';
 import { ImageToPdfTool } from './features/ImageToPdfTool/ImageToPdfTool';
 import { AnnotatePdfTool } from './features/AnnotatePdfTool/AnnotatePdfTool';
 import { AdobeStyleAnnotatePdfTool } from './features/AnnotatePdfTool/AdobeStyleAnnotatePdfTool';
+// أدوات التحويل الجديدة
+import { JpgToPdfTool } from './features/JpgToPdfTool/JpgToPdfTool';
+import { WordToPdfTool } from './features/WordToPdfTool/WordToPdfTool';
+import { PowerPointToPdfTool } from './features/PowerPointToPdfTool/PowerPointToPdfTool';
+import { ExcelToPdfTool } from './features/ExcelToPdfTool/ExcelToPdfTool';
+import { HtmlToPdfTool } from './features/HtmlToPdfTool/HtmlToPdfTool';
 
 const TOOLS: Tool[] = [
   { id: ToolId.MERGE, name: "دمج PDF", description: "دمج عدة ملفات PDF في ملف واحد.", icon: Users, acceptMultipleFiles: true, acceptMimeType: "application/pdf", allowAddingMoreFiles: true },
@@ -45,6 +52,12 @@ const TOOLS: Tool[] = [
   { id: ToolId.PDF_TO_TEXT, name: "PDF إلى نص", description: "استخراج النصوص من ملف PDF.", icon: ClipboardType, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
   { id: ToolId.COMPRESS_PDF, name: "ضغط PDF", description: "تقليل حجم ملف PDF.", icon: Minimize2, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
   { id: ToolId.UNLOCK_PDF, name: "إزالة حماية PDF", description: "محاولة إزالة قيود الحماية.", icon: KeyRound, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  // أدوات التحويل الجديدة
+  { id: ToolId.JPG_TO_PDF, name: "JPG إلى PDF", description: "تحويل صور JPG إلى ملف PDF.", icon: FileImage, acceptMultipleFiles: true, acceptMimeType: "image/jpeg,image/jpg", allowAddingMoreFiles: true },
+  { id: ToolId.WORD_TO_PDF, name: "Word إلى PDF", description: "تحويل مستندات Word إلى PDF.", icon: FileText, acceptMultipleFiles: true, acceptMimeType: ".docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document", allowAddingMoreFiles: true },
+  { id: ToolId.POWERPOINT_TO_PDF, name: "PowerPoint إلى PDF", description: "تحويل عروض PowerPoint إلى PDF.", icon: Presentation, acceptMultipleFiles: true, acceptMimeType: ".pptx,.ppt,application/vnd.openxmlformats-officedocument.presentationml.presentation", allowAddingMoreFiles: true },
+  { id: ToolId.EXCEL_TO_PDF, name: "Excel إلى PDF", description: "تحويل جداول Excel إلى PDF.", icon: FileSpreadsheet, acceptMultipleFiles: true, acceptMimeType: ".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", allowAddingMoreFiles: true },
+  { id: ToolId.HTML_TO_PDF, name: "HTML إلى PDF", description: "تحويل صفحات HTML إلى PDF.", icon: Code, acceptMultipleFiles: true, acceptMimeType: ".html,.htm,text/html", allowAddingMoreFiles: true },
 ];
 
 
@@ -242,6 +255,17 @@ const App: React.FC = () => {
             return <ImageToPdfTool uploadedFiles={loadedFiles} />;
         case ToolId.ANNOTATE_PDF:
             return <AdobeStyleAnnotatePdfTool uploadedFile={singleUploadedFile} onBackToTools={handleBackToTools} />;
+        // أدوات التحويل الجديدة
+        case ToolId.JPG_TO_PDF:
+            return <JpgToPdfTool uploadedFiles={loadedFiles} />;
+        case ToolId.WORD_TO_PDF:
+            return <WordToPdfTool uploadedFiles={loadedFiles} />;
+        case ToolId.POWERPOINT_TO_PDF:
+            return <PowerPointToPdfTool uploadedFiles={loadedFiles} />;
+        case ToolId.EXCEL_TO_PDF:
+            return <ExcelToPdfTool uploadedFiles={loadedFiles} />;
+        case ToolId.HTML_TO_PDF:
+            return <HtmlToPdfTool uploadedFiles={loadedFiles} />;
         default:
             return <p className="text-center text-[var(--color-text-muted)]">الأداة المحددة غير متاحة حاليًا أو لم يتم التعرف عليها.</p>;
     }

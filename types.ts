@@ -14,6 +14,12 @@ export enum ToolId {
   SPLIT_PDF = 'split_pdf',
   EXTRACT_PAGES = 'extract_pages',
   IMAGE_TO_PDF = 'image_to_pdf',
+  // أدوات التحويل الجديدة
+  JPG_TO_PDF = 'jpg_to_pdf',
+  WORD_TO_PDF = 'word_to_pdf',
+  POWERPOINT_TO_PDF = 'powerpoint_to_pdf',
+  EXCEL_TO_PDF = 'excel_to_pdf',
+  HTML_TO_PDF = 'html_to_pdf',
 }
 
 export interface Tool {
