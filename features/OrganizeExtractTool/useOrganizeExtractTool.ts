@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import * as pdfLib from 'pdf-lib';
 import { UploadedFile, PageSelectionMap, ToolId } from '../../types'; 
 import { downloadPdf } from '../../lib/fileUtils';
@@ -38,11 +38,27 @@ export const useOrganizeExtractTool = ({
   const { displayMessage, setGlobalLoading, areCoreServicesReady } = useAppContext();
   const [organizablePdf, setOrganizablePdf] = useState<OrganizablePdf | null>(null);
   const [pageSelectionMap, setPageSelectionMap] = useState<PageSelectionMap>({});
-  const [isProcessingAction, setIsProcessingAction] = useState(false); 
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
+  
+  // Add ref to prevent multiple simultaneous preparations
+  const preparationInProgress = useRef(false);
+  const lastProcessedFileId = useRef<string | null>(null); 
 
   const preparePdfForView = useCallback(async () => {
     if (!uploadedFile?.pdfDoc) {
       setOrganizablePdf(null);
+      return;
+    }
+
+    // Prevent multiple simultaneous preparations
+    if (preparationInProgress.current) {
+      console.log('PDF preparation already in progress, skipping...');
+      return;
+    }
+
+    // Check if we already processed this file
+    if (lastProcessedFileId.current === uploadedFile.id) {
+      console.log('File already processed, skipping...');
       return;
     }
 
@@ -64,6 +80,7 @@ export const useOrganizeExtractTool = ({
       return;
     }
     
+    preparationInProgress.current = true;
     setGlobalLoading(true); 
     try {
       const pdfLibDocInstance = uploadedFile.pdfDoc; 
@@ -157,6 +174,8 @@ export const useOrganizeExtractTool = ({
         setPageSelectionMap({}); 
       }
       
+      // Mark this file as processed
+      lastProcessedFileId.current = uploadedFile.id;
       console.log(`Successfully processed ${pagesInfo.length} pages`);
     } catch (err: any) {
       console.error('Error preparing PDF for organize/extract:', err);
@@ -177,8 +196,9 @@ export const useOrganizeExtractTool = ({
       setOrganizablePdf(null);
     } finally {
       setGlobalLoading(false); 
+      preparationInProgress.current = false; // Reset the flag
     }
-  }, [uploadedFile, displayMessage, setGlobalLoading, currentToolId, areCoreServicesReady]);
+  }, [uploadedFile?.id, uploadedFile?.file, uploadedFile?.pdfDoc, displayMessage, setGlobalLoading, currentToolId, areCoreServicesReady]);
 
   useEffect(() => {
     if (uploadedFile?.pdfDoc && areCoreServicesReady) { // Only prepare if services are ready

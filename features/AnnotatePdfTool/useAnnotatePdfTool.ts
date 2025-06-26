@@ -94,6 +94,19 @@ export const useAnnotatePdfTool = ({
           displayMessage('info', "الخدمات الأساسية (PDF.js) قيد التحضير للمعاينة.");
           return;
       }
+      
+      // تحقق من أن العملية ليست قيد التشغيل بالفعل
+      if (thumbnailGenerationInProgressRef.current) {
+        console.log('Thumbnail generation already in progress, skipping...');
+        return;
+      }
+      
+      // تحقق من أن الملف لم يتم معالجته بالفعل
+      if (lastProcessedFileRef.current === deferredUploadedFile.id) {
+        console.log('File already processed for thumbnails, skipping...');
+        return;
+      }
+      
       if (!window.pdfjsLib) {
         displayMessage('error', "مكتبة عرض PDF غير جاهزة. لا يمكن تحضير أداة التعديل.", 10000);
         return;
