@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import * as pdfLib from 'pdf-lib';
 import { UploadedFile, PageSelectionMap, ToolId } from '../../types'; 
 import { downloadPdf } from '../../lib/fileUtils';
@@ -40,12 +40,13 @@ export const useOrganizeExtractTool = ({
   const [pageSelectionMap, setPageSelectionMap] = useState<PageSelectionMap>({});
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   
-  // Add ref to prevent multiple simultaneous preparations
+  // Use ref to prevent multiple preparations - refs don't cause re-renders
   const preparationInProgress = useRef(false);
-  const lastProcessedFileId = useRef<string | null>(null); 
+  const lastProcessedFileId = useRef<string | null>(null);
+  const isComponentMounted = useRef(true); 
 
   const preparePdfForView = useCallback(async () => {
-    if (!uploadedFile?.pdfDoc) {
+    if (!uploadedFile?.pdfDoc || !isComponentMounted.current) {
       setOrganizablePdf(null);
       return;
     }
@@ -200,14 +201,27 @@ export const useOrganizeExtractTool = ({
     }
   }, [uploadedFile?.id, uploadedFile?.file, uploadedFile?.pdfDoc, displayMessage, setGlobalLoading, currentToolId, areCoreServicesReady]);
 
+  // Simple effect to handle PDF preparation
   useEffect(() => {
-    if (uploadedFile?.pdfDoc && areCoreServicesReady) { // Only prepare if services are ready
+    // Only prepare if all conditions are met and not already processed
+    if (uploadedFile?.pdfDoc && 
+        areCoreServicesReady && 
+        lastProcessedFileId.current !== uploadedFile?.id && 
+        !preparationInProgress.current) {
       preparePdfForView();
-    } else if (!uploadedFile?.pdfDoc) { // Clear if no file
-      setOrganizablePdf(null); 
+    } else if (!uploadedFile?.pdfDoc) {
+      // Clear if no file
+      setOrganizablePdf(null);
+      lastProcessedFileId.current = null;
     }
-    // If services are not ready yet, preparePdfForView will be called again when areCoreServicesReady becomes true
-  }, [uploadedFile?.id, uploadedFile?.pdfDoc, areCoreServicesReady]); // Remove preparePdfForView from dependencies to prevent infinite loop
+  }, [uploadedFile?.id, uploadedFile?.pdfDoc, areCoreServicesReady, preparePdfForView]);
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      isComponentMounted.current = false;
+    };
+  }, []);
 
 
   const handleRotatePage = (pageId: string, direction: 'cw' | 'ccw') => {
