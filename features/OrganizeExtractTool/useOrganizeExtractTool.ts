@@ -4,6 +4,10 @@ import * as pdfLib from 'pdf-lib';
 import { UploadedFile, PageSelectionMap, ToolId } from '../../types'; 
 import { downloadPdf } from '../../lib/fileUtils';
 import { useAppContext } from '../../contexts/AppContext';
+import { printPdfJsDiagnostics } from '../../lib/pdfjs-diagnostics';
+import { quickFixPdfJsWorker, setupPdfJsWorkerWithFallback } from '../../lib/pdfjs-worker-fix';
+import { pdfJsSetup } from '../../lib/pdfjs-ultimate-setup';
+import { forceFixPdfJsWorker, quickWorkerFix } from '../../lib/pdfjs-force-fix';
 
 declare global {
   interface Window {
@@ -181,6 +185,86 @@ export const useOrganizeExtractTool = ({
     } catch (err: any) {
       console.error('Error preparing PDF for organize/extract:', err);
       
+      // محاولة إصلاح فوري لمشكلة worker
+      if (err.message.includes('worker') || err.message.includes('fetch')) {
+        console.log('🔧 محاولة إصلاح فوري لمشكلة PDF.js worker...');
+        
+        try {
+          // محاولة الإصلاح القسري أولاً
+          console.log('🔧 محاولة الإصلاح القسري لـ PDF.js...');
+          const forceFixSuccess = await forceFixPdfJsWorker();
+          
+          if (forceFixSuccess) {
+            console.log('✅ نجح الإصلاح القسري!');
+            
+            // إعادة المحاولة مرة واحدة
+            console.log('🔄 إعادة محاولة تحميل PDF بعد الإصلاح القسري...');
+            const originalFileArrayBuffer = await uploadedFile.file.arrayBuffer();
+            const loadingTask = window.pdfjsLib.getDocument({ 
+              data: originalFileArrayBuffer,
+              verbosity: 0,
+              useWorkerFetch: false,
+              isEvalSupported: false
+            });
+            
+            const pdfJsDoc = await loadingTask.promise;
+            console.log('✅ نجح تحميل PDF بعد الإصلاح القسري!');
+            
+            // إذا نجح، نعيد تشغيل العملية
+            pdfJsDoc.destroy();
+            displayMessage('success', 'تم إصلاح مشكلة PDF.js بنجاح! جاري إعادة المحاولة...');
+            
+            // إعادة تشغيل العملية بعد تأخير قصير
+            setTimeout(() => {
+              if (isComponentMounted.current) {
+                preparePdfForView();
+              }
+            }, 1500);
+            
+            return; // الخروج من catch block
+          }
+          
+          // إذا فشل الإصلاح القسري، جرب الإصلاح السريع
+          console.log('⚠️ فشل الإصلاح القسري، جاري تطبيق إصلاح سريع...');
+          quickWorkerFix();
+          
+          // إعادة المحاولة مرة واحدة
+          console.log('🔄 إعادة محاولة تحميل PDF بعد الإصلاح السريع...');
+          const originalFileArrayBuffer = await uploadedFile.file.arrayBuffer();
+          const loadingTask = window.pdfjsLib.getDocument({ 
+            data: originalFileArrayBuffer,
+            verbosity: 0,
+            useWorkerFetch: false
+          });
+          
+          const pdfJsDoc = await loadingTask.promise;
+          console.log('✅ نجح تحميل PDF بعد الإصلاح السريع!');
+          
+          // إذا نجح، نعيد تشغيل العملية
+          pdfJsDoc.destroy();
+          displayMessage('info', 'تم إصلاح مشكلة PDF.js. جاري إعادة المحاولة...');
+          
+          // إعادة تشغيل العملية بعد تأخير قصير
+          setTimeout(() => {
+            if (isComponentMounted.current) {
+              preparePdfForView();
+            }
+          }, 1000);
+          
+          return; // الخروج من catch block
+          
+        } catch (fixError: any) {
+          console.error('فشل جميع محاولات الإصلاح:', fixError);
+          // المتابعة مع رسالة الخطأ العادية
+        }
+      }
+      
+      // تشغيل التشخيص في حالة فشل PDF.js
+      if (err.message.includes('worker') || err.message.includes('fetch') || err.message.includes('pdfjsLib')) {
+        console.log('🔍 تشغيل تشخيص PDF.js بسبب خطأ في Worker...');
+        printPdfJsDiagnostics();
+      }
+      
       // Provide more specific error messages
       let errorMessage = 'خطأ في تحضير الصفحات';
       if (err.message.includes('getDocument')) {
@@ -189,6 +273,10 @@ export const useOrganizeExtractTool = ({
         errorMessage = 'خطأ في عرض صفحات PDF. سيتم المتابعة بدون معاينة الصفحات.';
       } else if (err.message.includes('pdfjsLib')) {
         errorMessage = 'مكتبة PDF.js غير جاهزة. يرجى إعادة تحميل الصفحة.';
+      } else if (err.message.includes('worker')) {
+        errorMessage = 'خطأ في تحميل PDF.js worker. يرجى التحقق من اتصال الإنترنت وإعادة تحميل الصفحة.';
+      } else if (err.message.includes('fetch')) {
+        errorMessage = 'فشل في تحميل مكونات PDF.js. يرجى التحقق من اتصال الإنترنت.';
       } else {
         errorMessage = `خطأ في تحضير الصفحات: ${err.message}`;
       }

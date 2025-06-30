@@ -15,6 +15,29 @@ export default defineConfig(({ mode }) => {
       },
       preview: {
         allowedHosts: ['pdf-powertools.onrender.com']
-      }
+      },
+      // إضافة دعم أفضل لـ PDF.js
+      optimizeDeps: {
+        include: ['pdfjs-dist'],
+        exclude: ['pdfjs-dist/build/pdf.worker.min.mjs']
+      },
+      worker: {
+        format: 'es'
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            // تحسين تقسيم الكود
+            manualChunks: {
+              'pdfjs': ['pdfjs-dist'],
+              'pdf-lib': ['pdf-lib']
+            }
+          }
+        },
+        // إضافة دعم للـ workers
+        target: 'esnext'
+      },
+      // إعدادات إضافية لدعم PDF.js
+      assetsInclude: ['**/*.worker.js', '**/*.worker.mjs']
     };
 });

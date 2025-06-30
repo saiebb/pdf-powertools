@@ -14,12 +14,21 @@ export enum ToolId {
   SPLIT_PDF = 'split_pdf',
   EXTRACT_PAGES = 'extract_pages',
   IMAGE_TO_PDF = 'image_to_pdf',
-  // أدوات التحويل الجديدة
+  // أدوات التحويل إلى PDF
   JPG_TO_PDF = 'jpg_to_pdf',
   WORD_TO_PDF = 'word_to_pdf',
   POWERPOINT_TO_PDF = 'powerpoint_to_pdf',
   EXCEL_TO_PDF = 'excel_to_pdf',
   HTML_TO_PDF = 'html_to_pdf',
+  // أدوات التحويل من PDF
+  PDF_TO_JPG = 'pdf_to_jpg',
+  PDF_TO_WORD = 'pdf_to_word',
+  PDF_TO_POWERPOINT = 'pdf_to_powerpoint',
+  PDF_TO_EXCEL = 'pdf_to_excel',
+  PDF_TO_PDFA = 'pdf_to_pdfa',
+  // أدوات جديدة
+  REDACT_PDF = 'redact_pdf',
+  CROP_PDF = 'crop_pdf',
 }
 
 export interface Tool {

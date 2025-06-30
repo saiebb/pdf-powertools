@@ -43,20 +43,22 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ uploadedFiles })
         <FileSpreadsheet size={64} className="mx-auto mb-4 text-gray-400" />
         <p className="text-gray-600">يرجى رفع ملفات Excel (.xlsx) لتحويلها إلى PDF</p>
         
-        <Alert className="mt-6 max-w-md mx-auto">
-          <AlertTriangle className="h-4 w-4" />
-          <div>
-            <p className="font-semibold">ملاحظة مهمة</p>
-            <p className="text-sm mt-1">
-              تحويل Excel إلى PDF يتطلب خدمة خارجية أو مكتبة متخصصة. 
-              هذه الأداة تعمل كنموذج أولي وقد تحتاج إلى تكامل مع خدمات مثل:
-            </p>
-            <ul className="text-sm mt-2 list-disc list-inside">
-              <li>Microsoft Graph API</li>
-              <li>LibreOffice Online</li>
-              <li>مكتبة SheetJS + jsPDF</li>
-              <li>خدمات التحويل السحابية</li>
-            </ul>
+        <Alert type="warning" className="mt-6 max-w-md mx-auto">
+          <div className="flex items-start">
+            <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold">ملاحظة مهمة</p>
+              <p className="text-sm mt-1">
+                تحويل Excel إلى PDF يتطلب خدمة خارجية أو مكتبة متخصصة. 
+                هذه الأداة تعمل كنموذج أولي وقد تحتاج إلى تكامل مع خدمات مثل:
+              </p>
+              <ul className="text-sm mt-2 list-disc list-inside">
+                <li>Microsoft Graph API</li>
+                <li>LibreOffice Online</li>
+                <li>مكتبة SheetJS + jsPDF</li>
+                <li>خدمات التحويل السحابية</li>
+              </ul>
+            </div>
           </div>
         </Alert>
       </div>
@@ -86,14 +88,16 @@ export const ExcelToPdfTool: React.FC<ExcelToPdfToolProps> = ({ uploadedFiles })
       </div>
 
       {/* تحذير حول القيود */}
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <div>
-          <p className="font-semibold">قيود التحويل الحالية</p>
-          <p className="text-sm mt-1">
-            هذه النسخة التجريبية تدعم التحويل الأساسي فقط. 
-            قد لا تحافظ على المخططات، الصيغ المعقدة، أو التنسيق المتقدم.
-          </p>
+      <Alert type="warning">
+        <div className="flex items-start">
+          <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold">قيود التحويل الحالية</p>
+            <p className="text-sm mt-1">
+              هذه النسخة التجريبية تدعم التحويل الأساسي فقط. 
+              قد لا تحافظ على المخططات، الصيغ المعقدة، أو التنسيق المتقدم.
+            </p>
+          </div>
         </div>
       </Alert>
 

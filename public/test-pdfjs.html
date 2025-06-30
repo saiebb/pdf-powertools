@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار PDF.js</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin-top: 20px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 اختبار PDF.js</h1>
+        
+        <div id="status" class="status info">
+            جاري التحقق من PDF.js...
+        </div>
+        
+        <div>
+            <button onclick="testPdfJs()">اختبار PDF.js</button>
+            <button onclick="testWorkerPaths()">اختبار مسارات Worker</button>
+            <button onclick="clearLog()">مسح السجل</button>
+        </div>
+        
+        <div id="log"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function setStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testPdfJs() {
+            log('🔍 بدء اختبار PDF.js...');
+            
+            try {
+                // التحقق من توفر PDF.js
+                if (typeof window.pdfjsLib === 'undefined') {
+                    throw new Error('PDF.js غير متاح');
+                }
+                
+                log(`✅ PDF.js متاح - الإصدار: ${window.pdfjsLib.version}`);
+                
+                // التحقق من Worker
+                const workerSrc = window.pdfjsLib.GlobalWorkerOptions.workerSrc;
+                log(`🔗 Worker source: ${workerSrc || 'غير محدد'}`);
+                
+                if (!workerSrc) {
+                    log('⚠️ Worker غير محدد، جاري تعيين مسار افتراضي...');
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.js';
+                    log(`🔧 تم تعيين Worker إلى: ${window.pdfjsLib.GlobalWorkerOptions.workerSrc}`);
+                }
+                
+                // إنشاء PDF بسيط للاختبار
+                log('📄 إنشاء PDF للاختبار...');
+                const testPdf = new Uint8Array([
+                    0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, 0x0a,
+                    0x25, 0xc4, 0xe5, 0xf2, 0xe5, 0xeb, 0xa7, 0xf3, 0xa0, 0xd0, 0xc4, 0xc6, 0x0a,
+                    0x31, 0x20, 0x30, 0x20, 0x6f, 0x62, 0x6a, 0x0a, 0x3c, 0x3c, 0x2f, 0x54, 0x79, 0x70, 0x65, 0x2f, 0x43, 0x61, 0x74, 0x61, 0x6c, 0x6f, 0x67, 0x2f, 0x50, 0x61, 0x67, 0x65, 0x73, 0x20, 0x32, 0x20, 0x30, 0x20, 0x52, 0x3e, 0x3e, 0x0a, 0x65, 0x6e, 0x64, 0x6f, 0x62, 0x6a, 0x0a,
+                    0x32, 0x20, 0x30, 0x20, 0x6f, 0x62, 0x6a, 0x0a, 0x3c, 0x3c, 0x2f, 0x54, 0x79, 0x70, 0x65, 0x2f, 0x50, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x4b, 0x69, 0x64, 0x73, 0x5b, 0x33, 0x20, 0x30, 0x20, 0x52, 0x5d, 0x2f, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x20, 0x31, 0x3e, 0x3e, 0x0a, 0x65, 0x6e, 0x64, 0x6f, 0x62, 0x6a, 0x0a,
+                    0x33, 0x20, 0x30, 0x20, 0x6f, 0x62, 0x6a, 0x0a, 0x3c, 0x3c, 0x2f, 0x54, 0x79, 0x70, 0x65, 0x2f, 0x50, 0x61, 0x67, 0x65, 0x2f, 0x50, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x20, 0x32, 0x20, 0x30, 0x20, 0x52, 0x2f, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x42, 0x6f, 0x78, 0x5b, 0x30, 0x20, 0x30, 0x20, 0x36, 0x31, 0x32, 0x20, 0x37, 0x39, 0x32, 0x5d, 0x3e, 0x3e, 0x0a, 0x65, 0x6e, 0x64, 0x6f, 0x62, 0x6a, 0x0a,
+                    0x78, 0x72, 0x65, 0x66, 0x0a, 0x30, 0x20, 0x34, 0x0a, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x20, 0x36, 0x35, 0x35, 0x33, 0x35, 0x20, 0x66, 0x20, 0x0a, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x39, 0x20, 0x30, 0x30, 0x30, 0x30, 0x30, 0x20, 0x6e, 0x20, 0x0a, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x37, 0x34, 0x20, 0x30, 0x30, 0x30, 0x30, 0x30, 0x20, 0x6e, 0x20, 0x0a, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x31, 0x32, 0x30, 0x20, 0x30, 0x30, 0x30, 0x30, 0x30, 0x20, 0x6e, 0x20, 0x0a, 0x74, 0x72, 0x61, 0x69, 0x6c, 0x65, 0x72, 0x0a, 0x3c, 0x3c, 0x2f, 0x53, 0x69, 0x7a, 0x65, 0x20, 0x34, 0x2f, 0x52, 0x6f, 0x6f, 0x74, 0x20, 0x31, 0x20, 0x30, 0x20, 0x52, 0x3e, 0x3e, 0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x78, 0x72, 0x65, 0x66, 0x0a, 0x32, 0x31, 0x39, 0x0a, 0x25, 0x25, 0x45, 0x4f, 0x46
+                ]);
+                
+                const loadingTask = window.pdfjsLib.getDocument({ 
+                    data: testPdf,
+                    verbosity: 0 
+                });
+                
+                const doc = await loadingTask.promise;
+                log(`✅ تم تحميل PDF بنجاح - عدد الصفحات: ${doc.numPages}`);
+                
+                // اختبار تحميل صفحة
+                const page = await doc.getPage(1);
+                log(`✅ تم تحميل الصفحة الأولى بنجاح`);
+                
+                // تنظيف
+                await doc.destroy();
+                log('🧹 تم تنظيف الموارد');
+                
+                setStatus('✅ PDF.js يعمل بشكل صحيح!', 'success');
+                
+            } catch (error) {
+                log(`❌ خطأ: ${error.message}`);
+                setStatus(`❌ فشل الاختبار: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWorkerPaths() {
+            log('🔍 اختبار مسارات Worker...');
+            
+            const paths = [
+                './pdf.worker.min.js',
+                '/pdf.worker.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+                'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js'
+            ];
+            
+            for (const path of paths) {
+                try {
+                    log(`🧪 اختبار: ${path}`);
+                    const response = await fetch(path, { method: 'HEAD' });
+                    if (response.ok) {
+                        log(`✅ متاح: ${path}`);
+                    } else {
+                        log(`❌ غير متاح (${response.status}): ${path}`);
+                    }
+                } catch (error) {
+                    log(`❌ خطأ في الوصول: ${path} - ${error.message}`);
+                }
+            }
+        }
+
+        // تشغيل اختبار أولي عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            setTimeout(testPdfJs, 1000);
+        });
+    </script>
+</body>
+</html>

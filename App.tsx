@@ -8,7 +8,7 @@ import { Tool, ToolId, UploadedFile } from './types';
 import {
   Users, Settings2, Lock, Image as ImageIconLucide, ArrowLeft,
   Scissors, FileOutput, FileImage, FileEdit, KeyRound, ClipboardType, Minimize2, FileText,
-  FileSpreadsheet, Presentation, Code
+  FileSpreadsheet, Presentation, Code, FileCheck, EyeOff, Crop
 } from 'lucide-react'; 
 
 import { 
@@ -18,6 +18,7 @@ import {
 import { 
   setupPdfJsWorker
 } from './lib/pdfJsService';
+import { setupLocalPdfjs } from './lib/pdfjs-local-setup';
 import { useAppContext } from './contexts/AppContext';
 
 import { useFileLoader } from './lib/hooks/useFileLoader';
@@ -25,6 +26,7 @@ import { useFileLoader } from './lib/hooks/useFileLoader';
 import { ProtectTool } from './features/ProtectTool/ProtectTool';
 import { MergeTool } from './features/MergeTool/MergeTool';
 import { OrganizeExtractTool } from './features/OrganizeExtractTool/OrganizeExtractTool';
+import { OrganizeExtractToolSimple } from './features/OrganizeExtractTool/OrganizeExtractToolSimple';
 import { SplitTool } from './features/SplitTool/SplitTool';
 import { PdfToTextTool } from './features/PdfToTextTool/PdfToTextTool';
 import { PdfToImagesTool } from './features/PdfToImagesTool/PdfToImagesTool';
@@ -33,12 +35,22 @@ import { UnlockPdfTool } from './features/UnlockPdfTool/UnlockPdfTool';
 import { ImageToPdfTool } from './features/ImageToPdfTool/ImageToPdfTool';
 import { AnnotatePdfTool } from './features/AnnotatePdfTool/AnnotatePdfTool';
 import { AdobeStyleAnnotatePdfTool } from './features/AnnotatePdfTool/AdobeStyleAnnotatePdfTool';
-// أدوات التحويل الجديدة
+import { SimpleAnnotatePdfTool } from './features/AnnotatePdfTool/SimpleAnnotatePdfTool';
+// أدوات التحويل إلى PDF
 import { JpgToPdfTool } from './features/JpgToPdfTool/JpgToPdfTool';
 import { WordToPdfTool } from './features/WordToPdfTool/WordToPdfTool';
 import { PowerPointToPdfTool } from './features/PowerPointToPdfTool/PowerPointToPdfTool';
 import { ExcelToPdfTool } from './features/ExcelToPdfTool/ExcelToPdfTool';
 import { HtmlToPdfTool } from './features/HtmlToPdfTool/HtmlToPdfTool';
+// أدوات التحويل من PDF
+import { PdfToJpgTool } from './features/PdfToJpgTool/PdfToJpgTool';
+import { PdfToWordTool } from './features/PdfToWordTool/PdfToWordTool';
+import { PdfToPowerPointTool } from './features/PdfToPowerPointTool/PdfToPowerPointTool';
+import { PdfToExcelTool } from './features/PdfToExcelTool/PdfToExcelTool';
+import { PdfToPdfATool } from './features/PdfToPdfATool/PdfToPdfATool';
+// أدوات جديدة
+import { RedactPdfTool } from './features/RedactPdfTool/RedactPdfTool';
+import { CropPdfTool } from './features/CropPdfTool/CropPdfTool';
 
 const TOOLS: Tool[] = [
   { id: ToolId.MERGE, name: "دمج PDF", description: "دمج عدة ملفات PDF في ملف واحد.", icon: Users, acceptMultipleFiles: true, acceptMimeType: "application/pdf", allowAddingMoreFiles: true },
@@ -52,12 +64,21 @@ const TOOLS: Tool[] = [
   { id: ToolId.PDF_TO_TEXT, name: "PDF إلى نص", description: "استخراج النصوص من ملف PDF.", icon: ClipboardType, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
   { id: ToolId.COMPRESS_PDF, name: "ضغط PDF", description: "تقليل حجم ملف PDF.", icon: Minimize2, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
   { id: ToolId.UNLOCK_PDF, name: "إزالة حماية PDF", description: "محاولة إزالة قيود الحماية.", icon: KeyRound, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
-  // أدوات التحويل الجديدة
+  // أدوات التحويل إلى PDF
   { id: ToolId.JPG_TO_PDF, name: "JPG إلى PDF", description: "تحويل صور JPG إلى ملف PDF.", icon: FileImage, acceptMultipleFiles: true, acceptMimeType: "image/jpeg,image/jpg", allowAddingMoreFiles: true },
   { id: ToolId.WORD_TO_PDF, name: "Word إلى PDF", description: "تحويل مستندات Word إلى PDF.", icon: FileText, acceptMultipleFiles: true, acceptMimeType: ".docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document", allowAddingMoreFiles: true },
   { id: ToolId.POWERPOINT_TO_PDF, name: "PowerPoint إلى PDF", description: "تحويل عروض PowerPoint إلى PDF.", icon: Presentation, acceptMultipleFiles: true, acceptMimeType: ".pptx,.ppt,application/vnd.openxmlformats-officedocument.presentationml.presentation", allowAddingMoreFiles: true },
   { id: ToolId.EXCEL_TO_PDF, name: "Excel إلى PDF", description: "تحويل جداول Excel إلى PDF.", icon: FileSpreadsheet, acceptMultipleFiles: true, acceptMimeType: ".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", allowAddingMoreFiles: true },
   { id: ToolId.HTML_TO_PDF, name: "HTML إلى PDF", description: "تحويل صفحات HTML إلى PDF.", icon: Code, acceptMultipleFiles: true, acceptMimeType: ".html,.htm,text/html", allowAddingMoreFiles: true },
+  // أدوات التحويل من PDF
+  { id: ToolId.PDF_TO_JPG, name: "PDF إلى JPG", description: "تحويل صفحات PDF إلى صور JPG.", icon: FileImage, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  { id: ToolId.PDF_TO_WORD, name: "PDF إلى Word", description: "تحويل PDF إلى مستند Word.", icon: FileText, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  { id: ToolId.PDF_TO_POWERPOINT, name: "PDF إلى PowerPoint", description: "تحويل PDF إلى عرض تقديمي.", icon: Presentation, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  { id: ToolId.PDF_TO_EXCEL, name: "PDF إلى Excel", description: "تحويل PDF إلى جدول بيانات.", icon: FileSpreadsheet, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  { id: ToolId.PDF_TO_PDFA, name: "PDF إلى PDF/A", description: "تحويل PDF إلى PDF/A للأرشفة.", icon: FileCheck, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  // أدوات جديدة
+  { id: ToolId.REDACT_PDF, name: "تنقيح PDF", description: "تنقيح النص والرسومات لإزالة المعلومات الحساسة بشكل دائم من ملف PDF.", icon: EyeOff, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
+  { id: ToolId.CROP_PDF, name: "قص ملفات PDF", description: "قص الهوامش من مستندات PDF أو حدد مناطق معينة، ثم طبِّق التغييرات على صفحة واحدة أو على المستند بأكمله.", icon: Crop, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
 ];
 
 
@@ -237,7 +258,7 @@ const App: React.FC = () => {
             return <MergeTool uploadedFiles={loadedFiles} />;
         case ToolId.ORGANIZE:
         case ToolId.EXTRACT_PAGES:
-            return <OrganizeExtractTool
+            return <OrganizeExtractToolSimple
                         uploadedFile={singleUploadedFile}
                         currentToolId={currentTool.id as ToolId.ORGANIZE | ToolId.EXTRACT_PAGES}
                     />;
@@ -254,8 +275,8 @@ const App: React.FC = () => {
         case ToolId.IMAGE_TO_PDF:
             return <ImageToPdfTool uploadedFiles={loadedFiles} />;
         case ToolId.ANNOTATE_PDF:
-            return <AdobeStyleAnnotatePdfTool uploadedFile={singleUploadedFile} onBackToTools={handleBackToTools} />;
-        // أدوات التحويل الجديدة
+            return <SimpleAnnotatePdfTool uploadedFile={singleUploadedFile} onBackToTools={handleBackToTools} />;
+        // أدوات التحويل إلى PDF
         case ToolId.JPG_TO_PDF:
             return <JpgToPdfTool uploadedFiles={loadedFiles} />;
         case ToolId.WORD_TO_PDF:
@@ -266,6 +287,22 @@ const App: React.FC = () => {
             return <ExcelToPdfTool uploadedFiles={loadedFiles} />;
         case ToolId.HTML_TO_PDF:
             return <HtmlToPdfTool uploadedFiles={loadedFiles} />;
+        // أدوات التحويل من PDF
+        case ToolId.PDF_TO_JPG:
+            return <PdfToJpgTool uploadedFile={singleUploadedFile} />;
+        case ToolId.PDF_TO_WORD:
+            return <PdfToWordTool uploadedFile={singleUploadedFile} />;
+        case ToolId.PDF_TO_POWERPOINT:
+            return <PdfToPowerPointTool uploadedFile={singleUploadedFile} />;
+        case ToolId.PDF_TO_EXCEL:
+            return <PdfToExcelTool uploadedFile={singleUploadedFile} />;
+        case ToolId.PDF_TO_PDFA:
+            return <PdfToPdfATool uploadedFile={singleUploadedFile} />;
+        // أدوات جديدة
+        case ToolId.REDACT_PDF:
+            return <RedactPdfTool uploadedFile={singleUploadedFile} onBackToTools={handleBackToTools} />;
+        case ToolId.CROP_PDF:
+            return <CropPdfTool uploadedFile={singleUploadedFile} onBackToTools={handleBackToTools} />;
         default:
             return <p className="text-center text-[var(--color-text-muted)]">الأداة المحددة غير متاحة حاليًا أو لم يتم التعرف عليها.</p>;
     }
@@ -274,7 +311,7 @@ const App: React.FC = () => {
   const renderToolScreen = () => {
     if (!currentTool) return null;
 
-    // Special handling for Adobe-style PDF annotation tool
+    // Special handling for PDF annotation tool
     if (currentTool.id === ToolId.ANNOTATE_PDF && loadedFiles.length > 0) {
       return renderSpecificToolUI();
     }

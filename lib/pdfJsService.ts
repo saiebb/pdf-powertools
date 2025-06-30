@@ -1,4 +1,9 @@
 import { checkPdfJsStatus, isPdfJsReady, getPdfJsDebugInfo } from './pdfJsChecker';
+import { setupLocalPdfjs } from './pdfjs-local-setup';
+import { setupFallbackPdfjs } from './pdfjs-fallback-setup';
+import { setupPdfJsWorkerWithFallback, quickFixPdfJsWorker } from './pdfjs-worker-fix';
+import { pdfJsSetup } from './pdfjs-ultimate-setup';
+import { forceFixPdfJsWorker, quickWorkerFix } from './pdfjs-force-fix';
 
 // Declare pdfjsLib on the window object for TypeScript
 declare global {
@@ -14,9 +19,9 @@ export function setDisplayAppMessageFn(fn: DisplayMessageFn) {
   displayAppMessage = fn;
 }
 
-// PDF.js URLs - matches the version loaded in HTML
-const PDF_JS_URL = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';
-const PDF_WORKER_URL = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+// PDF.js URLs - matches the version in package.json (5.3.31)
+const PDF_JS_URL = 'https://unpkg.com/pdfjs-dist@5.3.31/build/pdf.min.mjs';
+const PDF_WORKER_URL = 'https://unpkg.com/pdfjs-dist@5.3.31/build/pdf.worker.min.mjs';
 
 // Track if we've already attempted to load PDF.js
 let pdfJsLoadAttempted = false;
@@ -28,6 +33,7 @@ function loadPdfJsScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     // Check if script already exists
     const existingScript = document.querySelector(`script[src="${PDF_JS_URL}"]`) || 
+                          document.querySelector(`script[src*="pdf.min.mjs"]`) ||
                           document.querySelector(`script[src*="pdf.min.js"]`);
     if (existingScript) {
       console.log('PDF.js script already exists in DOM');
@@ -48,6 +54,7 @@ function loadPdfJsScript(): Promise<void> {
     
     const script = document.createElement('script');
     script.src = PDF_JS_URL;
+    script.type = 'module'; // Support for ES modules
     script.onload = () => {
       console.log('PDF.js script loaded successfully');
       resolve();
@@ -91,10 +98,66 @@ export function setupPdfJsWorker(): Promise<void> {
         return;
       }
       
+      // Try ultimate setup first (comprehensive approach)
+      console.log('setupPdfJsWorker: Attempting ultimate PDF.js setup...');
+      const ultimateResult = await pdfJsSetup.setup();
+      
+      if (ultimateResult.success && isPdfJsReady()) {
+        console.log(`setupPdfJsWorker: Ultimate setup successful with method: ${ultimateResult.method}`);
+        pdfJsSetupCompleted = true;
+        return;
+      }
+      
+      console.log('setupPdfJsWorker: Ultimate setup failed, trying local setup...');
+      
+      // Try local setup as fallback
+      const localSetupSuccess = await setupLocalPdfjs();
+      
+      if (localSetupSuccess && isPdfJsReady()) {
+        console.log('setupPdfJsWorker: Local PDF.js setup successful!');
+        pdfJsSetupCompleted = true;
+        return;
+      }
+      
+      console.log('setupPdfJsWorker: Local setup failed, trying worker fix...');
+      
+      // Try the comprehensive worker fix
+      const workerFixSuccess = await setupPdfJsWorkerWithFallback();
+      
+      if (workerFixSuccess && isPdfJsReady()) {
+        console.log('setupPdfJsWorker: Worker fix successful!');
+        pdfJsSetupCompleted = true;
+        return;
+      }
+      
+      console.log('setupPdfJsWorker: Worker fix failed, trying fallback setup...');
+      
+      // Try fallback setup
+      const fallbackSetupSuccess = await setupFallbackPdfjs();
+      
+      if (fallbackSetupSuccess && isPdfJsReady()) {
+        console.log('setupPdfJsWorker: Fallback PDF.js setup successful!');
+        pdfJsSetupCompleted = true;
+        return;
+      }
+      
+      console.log('setupPdfJsWorker: Fallback setup failed, trying dynamic loading...');
+      
       // Check if PDF.js is loaded but worker not configured
       const status = checkPdfJsStatus();
       if (status.isAvailable && !status.workerConfigured) {
-        console.log('setupPdfJsWorker: PDF.js loaded but worker not configured, setting up worker...');
+        console.log('setupPdfJsWorker: PDF.js loaded but worker not configured, applying quick fix...');
+        quickFixPdfJsWorker();
+        
+        // Test if the quick fix worked
+        if (isPdfJsReady()) {
+          console.log('setupPdfJsWorker: Quick fix successful!');
+          pdfJsSetupCompleted = true;
+          return;
+        }
+        
+        // If quick fix didn't work, try the original approach
+        console.log('setupPdfJsWorker: Quick fix failed, trying original worker URL...');
         window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
         console.log(`PDF.js worker path set to: ${PDF_WORKER_URL}`);
         pdfJsSetupCompleted = true;
@@ -102,7 +165,7 @@ export function setupPdfJsWorker(): Promise<void> {
       }
 
       // If PDF.js is not available, try to load it dynamically
-      console.log('setupPdfJsWorker: PDF.js not ready, attempting to load...');
+      console.log('setupPdfJsWorker: PDF.js not ready, attempting dynamic loading...');
       await loadPdfJsScript();
       
       // Wait a bit for the script to initialize
@@ -113,7 +176,7 @@ export function setupPdfJsWorker(): Promise<void> {
         let attempts = 0;
         const maxAttempts = 10; // Reduced from 15 to 10 (5 seconds total)
 
-        const checkAndSetup = () => {
+        const checkAndSetup = async () => {
           attempts++;
           
           console.log(`setupPdfJsWorker: Polling attempt ${attempts}/${maxAttempts}`);
@@ -145,6 +208,20 @@ export function setupPdfJsWorker(): Promise<void> {
           }
 
           if (attempts >= maxAttempts) {
+            // Last resort: Try force fix before giving up
+            console.log('setupPdfJsWorker: Max attempts reached, trying force fix as last resort...');
+            try {
+              const forceFixSuccess = await forceFixPdfJsWorker();
+              if (forceFixSuccess && isPdfJsReady()) {
+                console.log('setupPdfJsWorker: Force fix successful!');
+                pdfJsSetupCompleted = true;
+                resolve();
+                return;
+              }
+            } catch (forceFixError) {
+              console.error('setupPdfJsWorker: Force fix also failed:', forceFixError);
+            }
+            
             const errorMsg = "PDF.js library not available from CDN after multiple attempts. This might be due to network issues or CDN problems.";
             console.error(errorMsg);
             displayAppMessage('error', 'فشل تحميل مكتبة PDF.js. يرجى التحقق من اتصال الإنترنت وإعادة تحميل الصفحة.', 10000);

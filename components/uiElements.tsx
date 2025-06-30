@@ -103,31 +103,35 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
 
 interface AlertProps {
-  type: 'success' | 'error' | 'warning' | 'info';
-  message: string;
+  type?: 'success' | 'error' | 'warning' | 'info';
+  message?: string;
+  children?: ReactNode;
   onClose?: () => void;
+  className?: string;
 }
 
-export const Alert: React.FC<AlertProps> = ({ type, message, onClose }) => {
+export const Alert: React.FC<AlertProps> = ({ 
+  type = 'info', 
+  message, 
+  children, 
+  onClose, 
+  className = '' 
+}) => {
   const baseClasses = "p-4 rounded-md text-sm flex items-start";
   // These could also be themed further if specific shades are needed via CSS vars
   const typeClasses = {
-    success: "bg-green-50 text-green-700",
-    error: "bg-red-50 text-red-700",
-    warning: "bg-yellow-50 text-yellow-700",
-    info: "bg-blue-50 text-blue-700", // Consider var(--color-primary-light) or similar
+    success: "bg-green-50 text-green-700 border border-green-200",
+    error: "bg-red-50 text-red-700 border border-red-200",
+    warning: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+    info: "bg-blue-50 text-blue-700 border border-blue-200", // Consider var(--color-primary-light) or similar
   };
-  const iconClasses = {
-    success: "fas fa-check-circle",
-    error: "fas fa-times-circle",
-    warning: "fas fa-exclamation-triangle",
-    info: "fas fa-info-circle",
-  }
 
   return (
-    <div className={`${baseClasses} ${typeClasses[type]}`} role="alert">
-      <i className={`${iconClasses[type]} mr-2 mt-0.5`}></i>
-      <span className="flex-grow">{message}</span>
+    <div className={`${baseClasses} ${typeClasses[type]} ${className}`} role="alert">
+      <div className="flex-grow">
+        {message && <span>{message}</span>}
+        {children}
+      </div>
       {onClose && (
         <button onClick={onClose} className="ml-4 -mr-1 -my-1 p-1 rounded hover:bg-opacity-20" aria-label="Dismiss">
            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
