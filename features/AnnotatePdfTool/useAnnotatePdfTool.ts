@@ -47,8 +47,8 @@ export const useAnnotatePdfTool = ({
   // استخدام تحسينات الأداء
   const {
     debounce,
-    throttle,
-    executeWithConcurrencyLimit,
+    // throttle,
+    // executeWithConcurrencyLimit,
     chunkWork,
     measurePerformance
   } = usePerformanceOptimization({

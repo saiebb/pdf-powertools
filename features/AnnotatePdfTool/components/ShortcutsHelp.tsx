@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Keyboard } from 'lucide-react';
-import { shortcuts, shortcutCategories, formatShortcutKey, getShortcutsByCategory } from '../config/shortcuts';
+import { shortcuts, formatShortcutKey } from '../config/shortcuts';
 
 interface ShortcutsHelpProps {
   isVisible: boolean;
@@ -13,7 +13,7 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
 }) => {
   if (!isVisible) return null;
 
-  const categories = Object.keys(shortcutCategories);
+  // const categories = Object.keys(shortcutCategories);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

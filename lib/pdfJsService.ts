@@ -3,7 +3,7 @@ import { setupLocalPdfjs } from './pdfjs-local-setup';
 import { setupFallbackPdfjs } from './pdfjs-fallback-setup';
 import { setupPdfJsWorkerWithFallback, quickFixPdfJsWorker } from './pdfjs-worker-fix';
 import { pdfJsSetup } from './pdfjs-ultimate-setup';
-import { forceFixPdfJsWorker, quickWorkerFix } from './pdfjs-force-fix';
+import { forceFixPdfJsWorker } from './pdfjs-force-fix';
 
 // Declare pdfjsLib on the window object for TypeScript
 declare global {
@@ -172,7 +172,7 @@ export function setupPdfJsWorker(): Promise<void> {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Now check again with polling
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         let attempts = 0;
         const maxAttempts = 10; // Reduced from 15 to 10 (5 seconds total)
 

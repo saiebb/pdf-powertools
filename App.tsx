@@ -1,14 +1,16 @@
 
-import React, { useState, useCallback, useEffect, ReactNode, useRef } from 'react';
+import React, { useState, useEffect, ReactNode, useRef } from 'react';
 // import * as pdfLib from 'pdf-lib'; // No longer needed directly here for fontkit registration
 
 import { FileUpload } from './components/FileUpload';
 import { Button, Spinner, Alert } from './components/uiElements'; 
-import { Tool, ToolId, UploadedFile } from './types'; 
+import { Tool, ToolId } from './types'; 
 import {
   Users, Settings2, Lock, Image as ImageIconLucide, ArrowLeft,
   Scissors, FileOutput, FileImage, FileEdit, KeyRound, ClipboardType, Minimize2, FileText,
-  FileSpreadsheet, Presentation, Code, FileCheck, EyeOff, Crop
+  FileSpreadsheet, Presentation, Code, FileCheck, EyeOff, Crop, 
+  FolderOpen, Shield, Download, Upload, ChevronDown, ChevronUp, Search, X,
+  type LucideIcon
 } from 'lucide-react'; 
 
 import { 
@@ -18,14 +20,14 @@ import {
 import { 
   setupPdfJsWorker
 } from './lib/pdfJsService';
-import { setupLocalPdfjs } from './lib/pdfjs-local-setup';
+// import { setupLocalPdfjs } from './lib/pdfjs-local-setup';
 import { useAppContext } from './contexts/AppContext';
 
 import { useFileLoader } from './lib/hooks/useFileLoader';
 
 import { ProtectTool } from './features/ProtectTool/ProtectTool';
 import { MergeTool } from './features/MergeTool/MergeTool';
-import { OrganizeExtractTool } from './features/OrganizeExtractTool/OrganizeExtractTool';
+// import { OrganizeExtractTool } from './features/OrganizeExtractTool/OrganizeExtractTool';
 import { OrganizeExtractToolSimple } from './features/OrganizeExtractTool/OrganizeExtractToolSimple';
 import { SplitTool } from './features/SplitTool/SplitTool';
 import { PdfToTextTool } from './features/PdfToTextTool/PdfToTextTool';
@@ -33,8 +35,8 @@ import { PdfToImagesTool } from './features/PdfToImagesTool/PdfToImagesTool';
 import { CompressPdfTool } from './features/CompressPdfTool/CompressPdfTool';
 import { UnlockPdfTool } from './features/UnlockPdfTool/UnlockPdfTool';
 import { ImageToPdfTool } from './features/ImageToPdfTool/ImageToPdfTool';
-import { AnnotatePdfTool } from './features/AnnotatePdfTool/AnnotatePdfTool';
-import { AdobeStyleAnnotatePdfTool } from './features/AnnotatePdfTool/AdobeStyleAnnotatePdfTool';
+// import { AnnotatePdfTool } from './features/AnnotatePdfTool/AnnotatePdfTool';
+// import { AdobeStyleAnnotatePdfTool } from './features/AnnotatePdfTool/AdobeStyleAnnotatePdfTool';
 import { SimpleAnnotatePdfTool } from './features/AnnotatePdfTool/SimpleAnnotatePdfTool';
 // أدوات التحويل إلى PDF
 import { JpgToPdfTool } from './features/JpgToPdfTool/JpgToPdfTool';
@@ -51,6 +53,16 @@ import { PdfToPdfATool } from './features/PdfToPdfATool/PdfToPdfATool';
 // أدوات جديدة
 import { RedactPdfTool } from './features/RedactPdfTool/RedactPdfTool';
 import { CropPdfTool } from './features/CropPdfTool/CropPdfTool';
+
+// تعريف المجموعات
+interface ToolGroup {
+  id: string;
+  name: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+  tools: Tool[];
+}
 
 const TOOLS: Tool[] = [
   { id: ToolId.MERGE, name: "دمج PDF", description: "دمج عدة ملفات PDF في ملف واحد.", icon: Users, acceptMultipleFiles: true, acceptMimeType: "application/pdf", allowAddingMoreFiles: true },
@@ -81,9 +93,74 @@ const TOOLS: Tool[] = [
   { id: ToolId.CROP_PDF, name: "قص ملفات PDF", description: "قص الهوامش من مستندات PDF أو حدد مناطق معينة، ثم طبِّق التغييرات على صفحة واحدة أو على المستند بأكمله.", icon: Crop, acceptMultipleFiles: false, acceptMimeType: "application/pdf" },
 ];
 
+// تنظيم الأدوات في مجموعات
+const TOOL_GROUPS: ToolGroup[] = [
+  {
+    id: 'organize',
+    name: 'تنظيم وإدارة PDF',
+    description: 'أدوات لتنظيم وإدارة ملفات PDF',
+    icon: FolderOpen,
+    color: 'blue',
+    tools: TOOLS.filter(tool => [
+      ToolId.MERGE, 
+      ToolId.ORGANIZE, 
+      ToolId.SPLIT_PDF, 
+      ToolId.EXTRACT_PAGES,
+      ToolId.COMPRESS_PDF
+    ].includes(tool.id))
+  },
+  {
+    id: 'convert-to-pdf',
+    name: 'التحويل إلى PDF',
+    description: 'تحويل الملفات والصور إلى PDF',
+    icon: Upload,
+    color: 'green',
+    tools: TOOLS.filter(tool => [
+      ToolId.IMAGE_TO_PDF,
+      ToolId.JPG_TO_PDF,
+      ToolId.WORD_TO_PDF,
+      ToolId.POWERPOINT_TO_PDF,
+      ToolId.EXCEL_TO_PDF,
+      ToolId.HTML_TO_PDF
+    ].includes(tool.id))
+  },
+  {
+    id: 'convert-from-pdf',
+    name: 'التحويل من PDF',
+    description: 'تحويل PDF إلى تنسيقات أخرى',
+    icon: Download,
+    color: 'purple',
+    tools: TOOLS.filter(tool => [
+      ToolId.PDF_TO_IMAGES,
+      ToolId.PDF_TO_JPG,
+      ToolId.PDF_TO_TEXT,
+      ToolId.PDF_TO_WORD,
+      ToolId.PDF_TO_POWERPOINT,
+      ToolId.PDF_TO_EXCEL,
+      ToolId.PDF_TO_PDFA
+    ].includes(tool.id))
+  },
+  {
+    id: 'edit-security',
+    name: 'التحرير والحماية',
+    description: 'تحرير وحماية ملفات PDF',
+    icon: Shield,
+    color: 'red',
+    tools: TOOLS.filter(tool => [
+      ToolId.ANNOTATE_PDF,
+      ToolId.PROTECT,
+      ToolId.UNLOCK_PDF,
+      ToolId.REDACT_PDF,
+      ToolId.CROP_PDF
+    ].includes(tool.id))
+  }
+];
+
 
 const App: React.FC = () => {
   const [currentToolId, setCurrentToolId] = useState<ToolId | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['organize'])); // افتح المجموعة الأولى افتراضياً
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const { 
     isLoading, 
     setGlobalLoading,
@@ -149,7 +226,7 @@ const App: React.FC = () => {
             // Updated service names for error reporting
             const serviceName = index === 0 ? "PDF.js" : "تحميل الخط العربي";
             console.error(`Service initialization failed for ${serviceName}:`, result.reason);
-            const reasonMessage = result.reason instanceof Error ? result.reason.message : String(result.reason);
+            // const reasonMessage = result.reason instanceof Error ? result.reason.message : String(result.reason);
             
             // Show user-friendly error messages in Arabic
             let userMessage = '';
@@ -211,6 +288,99 @@ const App: React.FC = () => {
   };
   const handleBackToTools = () => { resetState(true); };
 
+  const toggleGroupExpansion = (groupId: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupId)) {
+        newSet.delete(groupId);
+      } else {
+        newSet.add(groupId);
+      }
+      return newSet;
+    });
+  };
+
+  const getColorClasses = (color: string) => {
+    const colorMap = {
+      blue: {
+        bg: 'bg-blue-50',
+        border: 'border-blue-200',
+        icon: 'text-blue-600',
+        header: 'bg-blue-100',
+        hover: 'hover:bg-blue-200'
+      },
+      green: {
+        bg: 'bg-green-50',
+        border: 'border-green-200',
+        icon: 'text-green-600',
+        header: 'bg-green-100',
+        hover: 'hover:bg-green-200'
+      },
+      purple: {
+        bg: 'bg-purple-50',
+        border: 'border-purple-200',
+        icon: 'text-purple-600',
+        header: 'bg-purple-100',
+        hover: 'hover:bg-purple-200'
+      },
+      red: {
+        bg: 'bg-red-50',
+        border: 'border-red-200',
+        icon: 'text-red-600',
+        header: 'bg-red-100',
+        hover: 'hover:bg-red-200'
+      }
+    };
+    return colorMap[color as keyof typeof colorMap] || colorMap.blue;
+  };
+
+  // دالة البحث والتصفية
+  const getFilteredGroups = () => {
+    if (!searchQuery.trim()) {
+      return TOOL_GROUPS;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return TOOL_GROUPS.map(group => ({
+      ...group,
+      tools: group.tools.filter(tool => 
+        tool.name.toLowerCase().includes(query) ||
+        tool.description.toLowerCase().includes(query)
+      )
+    })).filter(group => group.tools.length > 0);
+  };
+
+  // تأثير البحث على المجموعات المفتوحة
+  const filteredGroups = getFilteredGroups();
+  
+  // فتح جميع المجموعات عند البحث
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setExpandedGroups(new Set(filteredGroups.map(g => g.id)));
+    }
+  }, [searchQuery, filteredGroups.length]);
+
+  // اختصارات لوحة المفاتيح
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl/Cmd + K للتركيز على البحث
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        const searchInput = document.querySelector('input[placeholder="ابحث في الأدوات..."]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+      // Escape لمسح البحث
+      if (event.key === 'Escape' && searchQuery) {
+        setSearchQuery('');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [searchQuery]);
+
   const handleRawFilesSelected = (rawFiles: File[]) => {
     clearSuccessMessage(); clearErrorMessage(); clearWarningMessage(); clearInfoMessage();
     if (currentTool) {
@@ -221,23 +391,160 @@ const App: React.FC = () => {
   };
   
   const renderHomePage = (): ReactNode => (
-    <div className="w-full max-w-4xl mx-auto text-center py-8 px-4">
-      <h1 className="text-4xl font-bold text-[var(--color-text-base)] mb-6 sm:text-5xl">محرر PDF متعدد الأدوات</h1>
-      <p className="text-lg text-[var(--color-text-muted)] mb-10 sm:text-xl">اختر أداة من القائمة أدناه للبدء في تعديل ملفات PDF الخاصة بك بسهولة وسرعة.</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-        {TOOLS.map(tool => (
-          <button
-            key={tool.id}
-            onClick={() => handleToolSelect(tool.id)}
-            className="bg-[var(--color-card-background)] p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-50 flex flex-col items-center text-center"
-            aria-label={tool.name}
-          >
-            <tool.icon size={40} className="mb-4 text-[var(--color-primary)]" />
-            <h3 className="text-md font-semibold text-[var(--color-text-base)] mb-1">{tool.name}</h3>
-            <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{tool.description}</p>
-          </button>
-        ))}
+    <div className="w-full max-w-6xl mx-auto text-center py-8 px-4">
+      <h1 className="text-4xl font-bold text-[var(--color-text-base)] mb-4 sm:text-5xl arabic-text">محرر PDF متعدد الأدوات</h1>
+      <p className="text-lg text-[var(--color-text-muted)] mb-6 sm:text-xl arabic-text">اختر أداة من المجموعات أدناه للبدء في تعديل ملفات PDF الخاصة بك بسهولة وسرعة.</p>
+      
+      {/* إحصائيات سريعة */}
+      {!searchQuery && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-2xl mx-auto">
+          {TOOL_GROUPS.map(group => {
+            const colorClasses = getColorClasses(group.color);
+            return (
+              <div key={group.id} className={`${colorClasses.bg} ${colorClasses.border} border rounded-lg p-3 text-center`}>
+                <group.icon size={24} className={`mx-auto mb-2 ${colorClasses.icon}`} />
+                <div className="text-lg font-bold text-[var(--color-text-base)]">{group.tools.length}</div>
+                <div className="text-xs text-[var(--color-text-muted)] arabic-text">{group.name}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      
+      {/* شريط البحث */}
+      <div className="mb-8 max-w-md mx-auto">
+        <div className="relative">
+          <Search size={20} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-text-muted)]" />
+          <input
+            type="text"
+            placeholder="ابحث في الأدوات... (Ctrl+K)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pr-10 pl-10 py-3 border-2 border-[var(--color-border)] rounded-lg focus:border-[var(--color-primary)] focus:outline-none transition-colors duration-200 text-right arabic-text focus-ring"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors duration-200"
+              aria-label="مسح البحث"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="text-sm text-[var(--color-text-muted)] mt-2 arabic-text">
+            تم العثور على {filteredGroups.reduce((total, group) => total + group.tools.length, 0)} أداة
+          </p>
+        )}
       </div>
+      
+      <div className="space-y-6">
+        {filteredGroups.length > 0 ? (
+          filteredGroups.map(group => {
+            const isExpanded = expandedGroups.has(group.id);
+            const colorClasses = getColorClasses(group.color);
+          
+          return (
+            <div 
+              key={group.id} 
+              className={`${colorClasses.bg} ${colorClasses.border} border-2 rounded-xl shadow-lg overflow-hidden transition-all duration-300`}
+            >
+              {/* رأس المجموعة */}
+              <button
+                onClick={() => toggleGroupExpansion(group.id)}
+                className={`w-full ${colorClasses.header} ${colorClasses.hover} p-4 flex items-center justify-between group-header focus-ring`}
+                aria-expanded={isExpanded}
+                aria-controls={`group-${group.id}`}
+              >
+                <div className="flex items-center text-right">
+                  <group.icon size={32} className={`ml-4 ${colorClasses.icon} icon-bounce`} />
+                  <div>
+                    <h2 className="text-xl font-bold text-[var(--color-text-base)] arabic-text">{group.name}</h2>
+                    <p className="text-sm text-[var(--color-text-muted)] mt-1 arabic-text">{group.description}</p>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <span className={`text-sm font-medium ${colorClasses.icon} ml-2`}>
+                    {group.tools.length} أداة
+                  </span>
+                  {isExpanded ? (
+                    <ChevronUp size={24} className={colorClasses.icon} />
+                  ) : (
+                    <ChevronDown size={24} className={colorClasses.icon} />
+                  )}
+                </div>
+              </button>
+
+              {/* محتوى المجموعة */}
+              <div 
+                id={`group-${group.id}`}
+                className={`group-expand-animation ${
+                  isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                } overflow-hidden`}
+              >
+                <div className="p-6 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {group.tools.map(tool => (
+                      <button
+                        key={tool.id}
+                        onClick={() => handleToolSelect(tool.id)}
+                        className="bg-white p-4 rounded-lg shadow-md tool-card focus-ring flex flex-col items-center text-center group arabic-text"
+                        aria-label={tool.name}
+                      >
+                        <tool.icon 
+                          size={32} 
+                          className={`mb-3 ${colorClasses.icon} group-hover:scale-110 transition-transform duration-200 icon-bounce`} 
+                        />
+                        <h3 className="text-sm font-semibold text-[var(--color-text-base)] mb-1 leading-tight">
+                          {tool.name}
+                        </h3>
+                        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+                          {tool.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })
+        ) : (
+          <div className="text-center py-12">
+            <Search size={48} className="mx-auto text-[var(--color-text-muted)] mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--color-text-base)] mb-2 arabic-text">لم يتم العثور على أدوات</h3>
+            <p className="text-[var(--color-text-muted)] arabic-text">جرب البحث بكلمات مختلفة أو امسح البحث لعرض جميع الأدوات</p>
+            <Button
+              onClick={() => setSearchQuery('')}
+              variant="ghost"
+              className="mt-4"
+            >
+              مسح البحث
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* زر لتوسيع/طي جميع المجموعات */}
+      {filteredGroups.length > 0 && !searchQuery && (
+        <div className="mt-8 flex justify-center gap-4">
+          <Button
+            onClick={() => setExpandedGroups(new Set(filteredGroups.map(g => g.id)))}
+            variant="ghost"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] arabic-text"
+          >
+            توسيع الكل
+          </Button>
+          <Button
+            onClick={() => setExpandedGroups(new Set())}
+            variant="ghost"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] arabic-text"
+          >
+            طي الكل
+          </Button>
+        </div>
+      )}
     </div>
   );
 

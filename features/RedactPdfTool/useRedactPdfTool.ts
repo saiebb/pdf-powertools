@@ -56,7 +56,7 @@ export const useRedactPdfTool = (
         // تطبيق التنقيح على جميع الصفحات
         const areasForCurrentPage = redactionAreas.filter(area => area.pageIndex === selectedPageIndex);
         
-        pages.forEach((page, pageIndex) => {
+        pages.forEach((page) => {
           const { height } = page.getSize();
           
           areasForCurrentPage.forEach(area => {

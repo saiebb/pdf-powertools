@@ -45,7 +45,7 @@ export const usePowerPointToPdfTool = () => {
           
           for (let i = 0; i < slideCount; i++) {
             const page = pdfDoc.addPage();
-            const { width, height } = page.getSize();
+            const { height } = page.getSize();
             
             // إضافة عنوان الشريحة
             page.drawText(`الشريحة ${i + 1} من ${file.name}`, {

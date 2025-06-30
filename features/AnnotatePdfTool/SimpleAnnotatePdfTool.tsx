@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { UploadedFile } from '../../types';
 import { Button } from '../../components/uiElements';
-import { FileEdit, Download, Type, Image as ImageIcon, ArrowLeft } from 'lucide-react';
+import { FileEdit, Download, Type, ArrowLeft } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext';
 import * as pdfLib from 'pdf-lib';
 import { downloadPdf } from '../../lib/fileUtils';

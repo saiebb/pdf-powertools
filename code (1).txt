@@ -1,0 +1,223 @@
+{
+  "pageName": "PDF to Word Converter Landing Page",
+  "description": "A clean and modern landing page for a web-based tool that converts PDF files to editable Word documents. The page guides the user through the conversion process, highlights key features and benefits, and provides additional resources like FAQs and a blog.",
+  "styleGuide": {
+    "palette": {
+      "primaryBackgroundColor": "#FFFFFF",
+      "secondaryBackgroundColor": "#F8F9FF",
+      "primaryAccentColor": "#4D76F4",
+      "secondaryAccentColor": "#6C5CE7",
+      "textColor": "#333333",
+      "subtleTextColor": "#666666",
+      "borderColor": "#E0E0E0",
+      "errorColor": "#D93025"
+    },
+    "typography": {
+      "fontFamily": "Modern Sans-Serif (e.g., Poppins, Inter)",
+      "headings": {
+        "fontWeight": "700"
+      },
+      "body": {
+        "fontWeight": "400"
+      }
+    },
+    "componentStyle": {
+      "borderRadius": "12px",
+      "boxShadow": "0px 4px 20px rgba(0, 0, 0, 0.05)",
+      "buttonPadding": "12px 24px"
+    }
+  },
+  "layout": {
+    "header": {
+      "sticky": true,
+      "elements": [
+        {
+          "type": "logo",
+          "text": "PDF TO WORD",
+          "icon": "cloud_document_icon.svg"
+        },
+        {
+          "type": "navigationMenu",
+          "links": [
+            {"text": "Home", "url": "/"},
+            {"text": "Blog", "url": "/blog"},
+            {"text": "FAQs", "url": "/faq"},
+            {"text": "More Tools", "isDropdown": true}
+          ]
+        },
+        {
+          "type": "link",
+          "text": "Contact",
+          "url": "/contact",
+          "style": "simple"
+        }
+      ]
+    },
+    "sections": [
+      {
+        "id": "heroConverter",
+        "type": "interactiveTool",
+        "title": "Convert PDF to Word",
+        "subtitle": "Convert PDF to Editable Word Document in high quality in a few simple and easy steps.",
+        "states": {
+          "initial": {
+            "component": "fileUploader",
+            "layout": "largeCard",
+            "instructions": "Drag and drop files here",
+            "primaryAction": {
+              "type": "button",
+              "text": "Upload File",
+              "icon": "upload_icon.svg"
+            },
+            "secondaryActions": [
+              {"type": "iconButton", "service": "Google Drive"},
+              {"type": "iconButton", "service": "Dropbox"}
+            ]
+          },
+          "processing": {
+            "component": "fileList",
+            "header": "Uploading Files",
+            "fileItem": {
+              "elements": ["fileIcon", "fileName", "fileSize", "progressBar", "statusText", "cancelButton"],
+              "statuses": ["Pending", "Converting...", "Complete", "Error"]
+            },
+            "actions": [
+              {"type": "button", "text": "Convert PDF to Word", "style": "primary"},
+              {"type": "link", "text": "Start Over", "style": "secondary"}
+            ],
+            "sidebar": {
+              "title": "Key Points",
+              "points": [
+                "Once converted, your file will be automatically downloaded.",
+                "You can also save your file service such as Google Drive or Dropbox.",
+                "We delete uploaded files converted after 24 hours.",
+                "Browser-based and works for all platforms."
+              ]
+            }
+          },
+          "completed": {
+            "component": "downloadManager",
+            "layout": "twoColumnCard",
+            "leftColumn": {
+              "title": "Download Files",
+              "fileList": [
+                {"fileName": "file_name.doc", "fileSize": "25.42 KB", "downloadButton": true}
+              ]
+            },
+            "rightColumn": {
+              "title": "Thank you for choosing PDF to Word,",
+              "subtitle": "You can trust us with your documents.",
+              "message": "If the download process does not start within 5 seconds, Click here.",
+              "illustration": "friendly_robot_with_confetti.svg"
+            },
+            "actions": [
+              {"type": "button", "text": "Download Zip File", "style": "primary-brown"},
+              {"type": "link", "text": "Start Over", "style": "secondary"}
+            ]
+          }
+        }
+      },
+      {
+        "id": "howItWorks",
+        "type": "processSteps",
+        "title": "How It Works",
+        "layout": "numberedListWithVisual",
+        "steps": [
+          {"id": "01", "title": "Add File", "description": "Upload files to the online converter."},
+          {"id": "02", "title": "Convert PDF to Word", "description": "Start the conversion by clicking 'Convert'."},
+          {"id": "03", "title": "Download File", "description": "Download your converted docx files."}
+        ],
+        "visual": {
+          "type": "image",
+          "src": "process_illustration.png",
+          "alt": "Illustration of the file conversion process"
+        }
+      },
+      {
+        "id": "topFeatures",
+        "type": "featureShowcase",
+        "eyebrow": "KNOW MORE ABOUT US",
+        "title": "Top Features",
+        "layout": "centralIllustrationWithCards",
+        "centralIllustration": "pdf_to_word_cloud_conversion.svg",
+        "features": [
+          {"icon": "batch_icon.svg", "title": "Batch Conversion", "description": "Lorem ipsum dolor sit amet consecturi."},
+          {"icon": "ocr_icon.svg", "title": "Advanced OCR", "description": "Lorem ipsum dolor sit amet consecturi."},
+          {"icon": "output_icon.svg", "title": "Customizable Output", "description": "Lorem ipsum dolor sit amet consecturi."},
+          {"icon": "page_select_icon.svg", "title": "Selective Page Conversion", "description": "Lorem ipsum dolor sit amet consecturi."}
+        ]
+      },
+      {
+        "id": "whyBest",
+        "type": "benefitsGrid",
+        "eyebrow": "OPTIONS",
+        "title": "Why This Tool is Best?",
+        "layout": "3x2 grid",
+        "benefits": [
+          {"icon": "editability_icon.svg", "title": "Editability"},
+          {"icon": "no_reader_icon.svg", "title": "Absence of a PDF reader"},
+          {"icon": "no_time_icon.svg", "title": "Convert Files in No Time"},
+          {"icon": "basic_easy_icon.svg", "title": "Basic and Easy"},
+          {"icon": "text_search_icon.svg", "title": "Possibility of Text Search"},
+          {"icon": "formatting_icon.svg", "title": "Maintaining Formatting"}
+        ]
+      },
+      {
+        "id": "faq",
+        "type": "faqAccordion",
+        "eyebrow": "PDF QUESTIONS ?",
+        "title": "We Have Answers",
+        "questions": [
+          {"question": "Lorem ipsum dolor sit amet neque in egestas hsu.", "answer": "Detailed answer text..."},
+          {"question": "Lorem ipsum dolor sit amet neque in egestas hsu.", "answer": "Detailed answer text..."},
+          {"question": "Lorem ipsum dolor sit amet neque in egestas hsu.", "answer": "Detailed answer text..."}
+        ]
+      },
+      {
+        "id": "latestBlogs",
+        "type": "contentGrid",
+        "eyebrow": "STAY UPDATED WITH US",
+        "title": "Latest Blogs",
+        "layout": "4-column card grid",
+        "posts": [
+          {
+            "image": "blog_post_image_1.png",
+            "category": "PDF TO WORD",
+            "title": "Blog post's title will come here",
+            "excerpt": "Lorem ipsum dolor sit amet consecturi ad fames morbid dui lac necs...",
+            "readMoreLink": "/blog/post-1"
+          }
+        ]
+      }
+    ],
+    "footer": {
+      "layout": "multi-column",
+      "columns": [
+        {
+          "type": "about",
+          "logo": "PDF TO WORD",
+          "description": "Lorem ipsum dolor sit amet neque in egestas hsu. Neque habitant morbi dui lacus..."
+        },
+        {
+          "type": "linkList",
+          "title": "Useful Links",
+          "links": [
+            {"text": "Home"}, {"text": "Blog"}, {"text": "FAQs"}, {"text": "More Tools"}
+          ]
+        },
+        {
+          "type": "socialMedia",
+          "title": "Follow us on",
+          "platforms": ["Facebook", "Twitter", "Instagram", "LinkedIn"]
+        }
+      ],
+      "bottomBar": {
+        "copyright": "© Copyright 2023. PDF to Word. All rights reserved.",
+        "legalLinks": [
+          {"text": "Privacy Policy", "url": "/privacy"},
+          {"text": "Terms of Use", "url": "/terms"}
+        ]
+      }
+    }
+  }
+}

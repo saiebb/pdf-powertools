@@ -109,7 +109,8 @@ export const usePdfToExcelTool = () => {
         });
       });
       
-      // إنشاء محتوى HTML لمحاكاة ملف Excel
+      // إنشاء محتوى HTML لمحاكاة ملف Excel - تم تعطيله لتوفير الذاكرة
+      /*
       const htmlContent = `
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -211,6 +212,7 @@ export const usePdfToExcelTool = () => {
     `).join('')}
 </body>
 </html>`;
+      */
       
       // إنشاء blob للتحميل (CSV يمكن فتحه في Excel)
       const blob = new Blob([csvContent], { 

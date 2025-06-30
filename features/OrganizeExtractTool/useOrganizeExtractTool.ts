@@ -1,12 +1,12 @@
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import * as pdfLib from 'pdf-lib';
 import { UploadedFile, PageSelectionMap, ToolId } from '../../types'; 
 import { downloadPdf } from '../../lib/fileUtils';
 import { useAppContext } from '../../contexts/AppContext';
 import { printPdfJsDiagnostics } from '../../lib/pdfjs-diagnostics';
-import { quickFixPdfJsWorker, setupPdfJsWorkerWithFallback } from '../../lib/pdfjs-worker-fix';
-import { pdfJsSetup } from '../../lib/pdfjs-ultimate-setup';
+// import { quickFixPdfJsWorker, setupPdfJsWorkerWithFallback } from '../../lib/pdfjs-worker-fix';
+// import { pdfJsSetup } from '../../lib/pdfjs-ultimate-setup';
 import { forceFixPdfJsWorker, quickWorkerFix } from '../../lib/pdfjs-force-fix';
 
 declare global {

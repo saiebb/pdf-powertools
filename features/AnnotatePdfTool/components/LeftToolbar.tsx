@@ -8,7 +8,7 @@ import {
   Ruler, 
   Type, 
   Eraser,
-  Palette,
+  // Palette,
   Image as ImageIcon,
   Highlighter,
   Underline,
@@ -48,7 +48,7 @@ interface ToolButtonProps {
 }
 
 const ToolButton: React.FC<ToolButtonProps> = ({ 
-  tool, 
+  // tool, 
   icon, 
   tooltip, 
   isActive, 

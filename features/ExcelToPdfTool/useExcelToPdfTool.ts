@@ -46,7 +46,7 @@ export const useExcelToPdfTool = () => {
           
           for (let sheetIndex = 0; sheetIndex < sheetCount; sheetIndex++) {
             const page = pdfDoc.addPage();
-            const { width, height } = page.getSize();
+            const { height } = page.getSize();
             
             // إضافة عنوان ورقة العمل
             page.drawText(`ورقة العمل ${sheetIndex + 1} من ${file.name}`, {

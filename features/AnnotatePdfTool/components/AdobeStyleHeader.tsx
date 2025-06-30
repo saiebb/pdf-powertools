@@ -6,7 +6,7 @@ import {
   User, 
   Bot,
   FileText,
-  Menu
+  // Menu
 } from 'lucide-react';
 import { Button } from '../../../components/uiElements';
 import './AdobeStyle.css';

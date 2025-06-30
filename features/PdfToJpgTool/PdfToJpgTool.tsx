@@ -1,7 +1,7 @@
 import React from 'react';
 import { UploadedFile } from '../../types';
 import { Button, Spinner } from '../../components/uiElements';
-import { Download, FileImage, Eye } from 'lucide-react';
+import { Download, FileImage } from 'lucide-react';
 import { usePdfToJpgTool } from './usePdfToJpgTool.ts';
 
 interface PdfToJpgToolProps {

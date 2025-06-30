@@ -22,7 +22,7 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
   onClose,
   currentPage,
   totalPages,
-  documentContent
+  // documentContent
 }) => {
   const [messages, setMessages] = useState<AIMessage[]>([
     {

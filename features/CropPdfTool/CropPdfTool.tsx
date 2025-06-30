@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadedFile } from '../../types';
 import { Button } from '../../components/uiElements';
-import { Crop, Download, ArrowLeft, RotateCcw, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { Crop, Download, ArrowLeft, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext';
 import { useCropPdfTool } from './useCropPdfTool';
 
@@ -25,8 +25,8 @@ export const CropPdfTool: React.FC<CropPdfToolProps> = ({
     setCropMode,
     selectedPreset,
     setSelectedPreset,
-    customMargins,
-    setCustomMargins,
+    // customMargins,
+    // setCustomMargins,
     applyCrop,
     previewCropWithPreset,
     totalPages,
@@ -163,7 +163,9 @@ export const CropPdfTool: React.FC<CropPdfToolProps> = ({
                   variant="ghost"
                   size="sm"
                   icon={<ChevronRight size={16} />}
-                />
+                >
+                  السابق
+                </Button>
                 <span className="text-sm text-gray-600">
                   {selectedPageIndex + 1} من {totalPages}
                 </span>
@@ -173,7 +175,9 @@ export const CropPdfTool: React.FC<CropPdfToolProps> = ({
                   variant="ghost"
                   size="sm"
                   icon={<ChevronLeft size={16} />}
-                />
+                >
+                  التالي
+                </Button>
               </div>
             </div>
             

@@ -3,7 +3,7 @@
 // مسارات مختلفة للـ worker حسب البيئة
 const getWorkerPaths = () => {
   // التحقق من توفر import.meta قبل الاستخدام
-  const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) || false;
+  // const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) || false;
   const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/';
   
   return {
@@ -21,6 +21,7 @@ const getWorkerPaths = () => {
 };
 
 // اختبار إمكانية الوصول لمسار worker
+/*
 const testWorkerPath = async (workerSrc: string): Promise<boolean> => {
   try {
     const response = await fetch(workerSrc, { method: 'HEAD' });
@@ -30,6 +31,7 @@ const testWorkerPath = async (workerSrc: string): Promise<boolean> => {
     return false;
   }
 };
+*/
 
 // إعداد worker مع fallback
 export const setupPdfJsWorkerWithFallback = async (): Promise<boolean> => {

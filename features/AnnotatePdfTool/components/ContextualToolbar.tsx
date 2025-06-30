@@ -7,7 +7,7 @@ import {
   AlignCenter, 
   AlignRight,
   Palette,
-  Type,
+  // Type,
   Trash2,
   Copy,
   Move,

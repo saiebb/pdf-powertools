@@ -248,7 +248,7 @@ test.describe('تنظيم PDF - اختبار شامل للرفع وتتبع ال
     await page.getByRole('button', { name: 'تنظيم PDF' }).click();
     
     // التحقق من وجود منطقة رفع الملف
-    const uploadArea = page.locator('[data-testid="upload-area"], .file-upload, .dropzone').first();
+    // const uploadArea = page.locator('[data-testid="upload-area"], .file-upload, .dropzone').first();
     const uploadText = page.getByText('اسحب وأفلت ملفات PDF (ملف واحد) هنا، أو انقر للتصفح');
     
     await expect(uploadText).toBeVisible();

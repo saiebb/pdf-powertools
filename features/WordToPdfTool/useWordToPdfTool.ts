@@ -42,7 +42,7 @@ export const useWordToPdfTool = () => {
           
           // إنشاء صفحة جديدة
           const page = pdfDoc.addPage();
-          const { width, height } = page.getSize();
+          const { height } = page.getSize();
           
           // إضافة نص توضيحي (في التطبيق الحقيقي سيكون المحتوى الفعلي)
           page.drawText(`تم تحويل الملف: ${file.name}`, {

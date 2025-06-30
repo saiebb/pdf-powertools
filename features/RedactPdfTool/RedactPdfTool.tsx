@@ -159,7 +159,9 @@ export const RedactPdfTool: React.FC<RedactPdfToolProps> = ({
                   variant="ghost"
                   size="sm"
                   icon={<ChevronRight size={16} />}
-                />
+                >
+                  السابق
+                </Button>
                 <span className="text-sm text-gray-600">
                   {selectedPageIndex + 1} من {totalPages}
                 </span>
@@ -169,7 +171,9 @@ export const RedactPdfTool: React.FC<RedactPdfToolProps> = ({
                   variant="ghost"
                   size="sm"
                   icon={<ChevronLeft size={16} />}
-                />
+                >
+                  التالي
+                </Button>
               </div>
             </div>
             
@@ -271,7 +275,9 @@ export const RedactPdfTool: React.FC<RedactPdfToolProps> = ({
                       size="sm"
                       icon={<Trash2 size={14} />}
                       className="text-red-600 hover:text-red-700"
-                    />
+                    >
+                      حذف
+                    </Button>
                   </div>
                 ))}
               </div>

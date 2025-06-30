@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { FileText as FileTextIcon } from 'lucide-react';
 import { Spinner } from '../../../components/uiElements';
 
